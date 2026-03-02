@@ -3846,7 +3846,7 @@ export default function App() {
   // 背景音乐播放列表
   const playlist = [
     'https://image2url.com/r2/default/audio/1772440569934-e45879ff-366e-45ff-8d12-a60fea223fdf.wav',
-    '/黑暗仪式.wav',
+    'https://image2url.com/r2/default/audio/1772440627725-13ba91ca-2fd5-4389-9f39-47b057f5a82c.wav',
     '/黑暗洞穴.wav',
     '/背景.wav'
   ];
