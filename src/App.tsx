@@ -351,7 +351,7 @@ const PurgeOverlay = ({ onComplete }: { onComplete: () => void }) => {
           // 显示图片
           setShowImage(true);
           // 播放音频
-          const audio = new Audio('https://image2url.com/r2/default/audio/1772442700.wav');
+          const audio = new Audio('./spk_1772442700.wav');
           audioRef.current = audio;
           
           // 设置音频属性
