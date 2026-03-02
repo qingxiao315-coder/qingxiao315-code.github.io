@@ -3837,11 +3837,49 @@ export default function App() {
   
   // 背景音乐管理
   const [bgMusicEnabled, setBgMusicEnabled] = useState(true);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  const [useLocalAudio, setUseLocalAudio] = useState(false);
+  const bgMusicRef = useRef<HTMLAudioElement | null>(null);
   const bgMusicOscillatorRef = useRef<OscillatorNode | null>(null);
   const bgMusicGainRef = useRef<GainNode | null>(null);
   
+  // 背景音乐播放列表
+  const playlist = [
+    '/黑暗仪式.wav',
+    '/黑暗洞穴.wav',
+    '/背景.wav'
+  ];
+  
+  // 检查本地音频文件是否存在
+  useEffect(() => {
+    const checkAudioFiles = async () => {
+      try {
+        // 尝试加载第一个音频文件
+        const audio = new Audio(playlist[0]);
+        await audio.load();
+        setUseLocalAudio(true);
+      } catch (error) {
+        console.log('本地音频文件不存在，使用 Web Audio API');
+        setUseLocalAudio(false);
+      }
+    };
+    
+    checkAudioFiles();
+  }, []);
+  
   // 初始化音效和背景音乐
   useEffect(() => {
+    // 创建背景音乐
+    bgMusicRef.current = new Audio();
+    bgMusicRef.current.volume = 0.3;
+    
+    // 监听音乐结束事件，自动切换到下一首
+    const handleEnded = () => {
+      setCurrentTrackIndex((prev) => (prev + 1) % playlist.length);
+    };
+    
+    bgMusicRef.current.addEventListener('ended', handleEnded);
+    
     // 监听用户交互
     const handleUserInteraction = () => {
       setUserInteracted(true);
@@ -3860,63 +3898,92 @@ export default function App() {
       if (audioContextRef.current) {
         audioContextRef.current.close();
       }
+      if (bgMusicRef.current) {
+        bgMusicRef.current.removeEventListener('ended', handleEnded);
+        bgMusicRef.current.pause();
+        bgMusicRef.current.src = '';
+      }
       if (bgMusicOscillatorRef.current) {
         bgMusicOscillatorRef.current.stop();
       }
     };
   }, []);
   
-  // 播放/停止背景音乐
+  // 切换音乐轨道
   useEffect(() => {
-    if (!audioContextRef.current || !userInteracted) return;
+    if (!useLocalAudio || !bgMusicRef.current || !userInteracted) return;
     
-    const ctx = audioContextRef.current;
+    bgMusicRef.current.src = playlist[currentTrackIndex];
+    bgMusicRef.current.load();
     
     if (bgMusicEnabled) {
-      // 创建环境音乐 - 低频嗡鸣声
-      const oscillator = ctx.createOscillator();
-      const gainNode = ctx.createGain();
-      const filter = ctx.createBiquadFilter();
-      
-      oscillator.type = 'sine';
-      oscillator.frequency.value = 55; // 低音A
-      
-      filter.type = 'lowpass';
-      filter.frequency.value = 200;
-      
-      gainNode.gain.value = 0.08;
-      
-      oscillator.connect(filter);
-      filter.connect(gainNode);
-      gainNode.connect(ctx.destination);
-      
-      oscillator.start();
-      
-      bgMusicOscillatorRef.current = oscillator;
-      bgMusicGainRef.current = gainNode;
-      
-      // 添加缓慢的音量变化
-      const lfo = ctx.createOscillator();
-      const lfoGain = ctx.createGain();
-      lfo.frequency.value = 0.1; // 非常慢的变化
-      lfoGain.gain.value = 0.02;
-      lfo.connect(lfoGain);
-      lfoGain.connect(gainNode.gain);
-      lfo.start();
+      bgMusicRef.current.play().catch(err => console.warn('音乐播放失败:', err));
+    }
+  }, [currentTrackIndex, useLocalAudio, userInteracted]);
+  
+  // 控制背景音乐播放/暂停
+  useEffect(() => {
+    if (useLocalAudio) {
+      // 使用本地音频文件
+      if (bgMusicRef.current && userInteracted) {
+        if (bgMusicEnabled) {
+          bgMusicRef.current.play().catch(err => console.warn('音乐播放失败:', err));
+        } else {
+          bgMusicRef.current.pause();
+        }
+      }
     } else {
-      if (bgMusicOscillatorRef.current) {
-        bgMusicOscillatorRef.current.stop();
-        bgMusicOscillatorRef.current = null;
+      // 使用 Web Audio API 生成音乐
+      if (!audioContextRef.current || !userInteracted) return;
+      
+      const ctx = audioContextRef.current;
+      
+      if (bgMusicEnabled) {
+        // 创建环境音乐 - 低频嗡鸣声
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        const filter = ctx.createBiquadFilter();
+        
+        oscillator.type = 'sine';
+        oscillator.frequency.value = 55; // 低音A
+        
+        filter.type = 'lowpass';
+        filter.frequency.value = 200;
+        
+        gainNode.gain.value = 0.08;
+        
+        oscillator.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        
+        oscillator.start();
+        
+        bgMusicOscillatorRef.current = oscillator;
+        bgMusicGainRef.current = gainNode;
+        
+        // 添加缓慢的音量变化
+        const lfo = ctx.createOscillator();
+        const lfoGain = ctx.createGain();
+        lfo.frequency.value = 0.1; // 非常慢的变化
+        lfoGain.gain.value = 0.02;
+        lfo.connect(lfoGain);
+        lfoGain.connect(gainNode.gain);
+        lfo.start();
+      } else {
+        if (bgMusicOscillatorRef.current) {
+          bgMusicOscillatorRef.current.stop();
+          bgMusicOscillatorRef.current = null;
+        }
       }
     }
     
     return () => {
-      if (bgMusicOscillatorRef.current) {
+      if (!useLocalAudio && bgMusicOscillatorRef.current) {
         bgMusicOscillatorRef.current.stop();
         bgMusicOscillatorRef.current = null;
       }
     };
-  }, [bgMusicEnabled, userInteracted]);
+  }, [bgMusicEnabled, useLocalAudio, userInteracted]);
   
   // 切换背景音乐
   const toggleBgMusic = () => {

@@ -11,6 +11,12 @@ dist/
 build/
 *.local
 
+# Audio files
+*.wav
+*.mp3
+*.ogg
+*.flac
+
 # Environment variables
 .env
 .env.local
