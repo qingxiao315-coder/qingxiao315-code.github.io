@@ -354,6 +354,9 @@ const PurgeOverlay = ({ onComplete }: { onComplete: () => void }) => {
           const audio = new Audio('https://image2url.com/r2/default/audio/1772442700.wav');
           audioRef.current = audio;
           
+          // 设置音频属性
+          audio.volume = 0.5;
+          
           audio.onended = () => {
             // 音频播放完毕后显示失败信息
             setShowFailure(true);
@@ -362,6 +365,7 @@ const PurgeOverlay = ({ onComplete }: { onComplete: () => void }) => {
             }, 2000);
           };
           
+          // 尝试播放音频
           audio.play().catch(error => {
             console.error('音频播放失败:', error);
             // 音频播放失败时也显示失败信息
@@ -431,12 +435,12 @@ const PurgeOverlay = ({ onComplete }: { onComplete: () => void }) => {
         <motion.div 
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="flex flex-col items-center gap-8"
+          className="flex flex-col items-center gap-8 w-full h-full relative"
         >
           <img 
             src="./屏幕截图 2025-10-01 230554.png" 
             alt="系统状态" 
-            className="max-w-full max-h-[70vh] object-contain"
+            className="w-full h-full object-cover absolute inset-0"
             onError={(e) => {
               console.error('图片加载失败:', e);
               // 图片加载失败时也显示失败信息
