@@ -434,9 +434,17 @@ const PurgeOverlay = ({ onComplete }: { onComplete: () => void }) => {
           className="flex flex-col items-center gap-8"
         >
           <img 
-            src="/屏幕截图 2025-10-01 230554.png" 
+            src="./屏幕截图 2025-10-01 230554.png" 
             alt="系统状态" 
             className="max-w-full max-h-[70vh] object-contain"
+            onError={(e) => {
+              console.error('图片加载失败:', e);
+              // 图片加载失败时也显示失败信息
+              setShowFailure(true);
+              setTimeout(() => {
+                onComplete();
+              }, 2000);
+            }}
           />
           <div className="text-sm tracking-widest uppercase">
             &gt; 正在执行最终清除...
