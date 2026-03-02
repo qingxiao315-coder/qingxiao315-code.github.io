@@ -3167,7 +3167,7 @@ const AdminDashboard = ({
     if (!newItem.id || !newItem.title || !selectedArchiveId) return;
     const newArchives = { ...archives };
     
-    if (editingItemId) {
+    if (editingItemId !== null) {
       // Update existing item
       newArchives[selectedArchiveId].items = newArchives[selectedArchiveId].items.map((item: any) => 
         item.id === editingItemId ? { ...newItem } : item
