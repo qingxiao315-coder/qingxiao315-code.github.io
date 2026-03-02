@@ -3137,10 +3137,16 @@ const AdminDashboard = ({
   const getNextCategoryId = () => {
     const ids = Object.keys(archives).filter(id => id.startsWith('REF_'));
     if (ids.length === 0) return 'REF_001';
-    const maxId = Math.max(...ids.map(id => {
+    
+    // 提取所有数字部分并找出最大值
+    let maxId = 0;
+    ids.forEach(id => {
       const num = parseInt(id.replace('REF_', ''), 10);
-      return isNaN(num) ? 0 : num;
-    }));
+      if (!isNaN(num) && num > maxId) {
+        maxId = num;
+      }
+    });
+    
     return `REF_${(maxId + 1).toString().padStart(3, '0')}`;
   };
 
