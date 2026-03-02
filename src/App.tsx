@@ -3845,6 +3845,7 @@ export default function App() {
   
   // 背景音乐播放列表
   const playlist = [
+    'https://image2url.com/r2/default/audio/1772440569934-e45879ff-366e-45ff-8d12-a60fea223fdf.wav',
     '/黑暗仪式.wav',
     '/黑暗洞穴.wav',
     '/背景.wav'
@@ -3854,12 +3855,19 @@ export default function App() {
   useEffect(() => {
     const checkAudioFiles = async () => {
       try {
-        // 尝试加载第一个音频文件
+        // 尝试加载第一个音频文件（远程 URL）
         const audio = new Audio(playlist[0]);
-        await audio.load();
+        
+        // 等待音频加载完成
+        await new Promise((resolve, reject) => {
+          audio.addEventListener('canplaythrough', resolve);
+          audio.addEventListener('error', reject);
+          audio.load();
+        });
+        
         setUseLocalAudio(true);
       } catch (error) {
-        console.log('本地音频文件不存在，使用 Web Audio API');
+        console.log('音频文件加载失败，使用 Web Audio API');
         setUseLocalAudio(false);
       }
     };
