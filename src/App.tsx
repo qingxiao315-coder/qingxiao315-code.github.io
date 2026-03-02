@@ -330,6 +330,10 @@ const SearchPage = ({ onLogout, onNavigate, archives, onSelectArchive, onSelectI
 
 const PurgeOverlay = ({ onComplete }: { onComplete: () => void }) => {
   const [stage, setStage] = useState(0);
+  const [showImage, setShowImage] = useState(false);
+  const [showFailure, setShowFailure] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  
   const messages = [
     "正在启动紧急清除程序...",
     "正在擦除核心内存...",
@@ -344,13 +348,41 @@ const PurgeOverlay = ({ onComplete }: { onComplete: () => void }) => {
       setStage(s => {
         if (s >= messages.length - 1) {
           clearInterval(timer);
-          setTimeout(onComplete, 500);
+          // 显示图片
+          setShowImage(true);
+          // 播放音频
+          const audio = new Audio('https://image2url.com/r2/default/audio/1772442700.wav');
+          audioRef.current = audio;
+          
+          audio.onended = () => {
+            // 音频播放完毕后显示失败信息
+            setShowFailure(true);
+            setTimeout(() => {
+              onComplete();
+            }, 2000);
+          };
+          
+          audio.play().catch(error => {
+            console.error('音频播放失败:', error);
+            // 音频播放失败时也显示失败信息
+            setShowFailure(true);
+            setTimeout(() => {
+              onComplete();
+            }, 2000);
+          });
+          
           return s;
         }
         return s + 1;
       });
     }, 600);
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
   }, [onComplete, messages.length]);
 
   return (
@@ -360,39 +392,75 @@ const PurgeOverlay = ({ onComplete }: { onComplete: () => void }) => {
       className="fixed inset-0 z-[200] bg-black flex flex-col items-center justify-center p-10 font-mono text-terminal-red"
     >
       <div className="crt-overlay"></div>
-      <motion.div 
-        animate={{ 
-          opacity: [1, 0.5, 1, 0.8, 1],
-          x: [0, -2, 2, -1, 0]
-        }}
-        transition={{ duration: 0.2, repeat: Infinity }}
-        className="flex flex-col items-center gap-8 max-w-md w-full"
-      >
-        <AlertTriangle className="w-20 h-20 animate-pulse" />
-        <h2 className="text-2xl font-bold tracking-[0.3em] text-center uppercase">
-          紧急清除进行中
-        </h2>
-        <div className="w-full h-2 bg-terminal-red/20 rounded-full overflow-hidden">
-          <motion.div 
-            className="h-full bg-terminal-red"
-            initial={{ width: "0%" }}
-            animate={{ width: `${(stage / (messages.length - 1)) * 100}%` }}
+      
+      {!showImage && !showFailure ? (
+        <motion.div 
+          animate={{ 
+            opacity: [1, 0.5, 1, 0.8, 1],
+            x: [0, -2, 2, -1, 0]
+          }}
+          transition={{ duration: 0.2, repeat: Infinity }}
+          className="flex flex-col items-center gap-8 max-w-md w-full"
+        >
+          <AlertTriangle className="w-20 h-20 animate-pulse" />
+          <h2 className="text-2xl font-bold tracking-[0.3em] text-center uppercase">
+            紧急清除进行中
+          </h2>
+          <div className="w-full h-2 bg-terminal-red/20 rounded-full overflow-hidden">
+            <motion.div 
+              className="h-full bg-terminal-red"
+              initial={{ width: "0%" }}
+              animate={{ width: `${(stage / (messages.length - 1)) * 100}%` }}
+            />
+          </div>
+          <div className="h-20 flex items-center justify-center text-center">
+            <AnimatePresence mode="wait">
+              <motion.p 
+                key={stage}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="text-sm tracking-widest uppercase"
+              >
+                &gt; {messages[stage]}
+              </motion.p>
+            </AnimatePresence>
+          </div>
+        </motion.div>
+      ) : showImage && !showFailure ? (
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center gap-8"
+        >
+          <img 
+            src="/屏幕截图 2025-10-01 230554.png" 
+            alt="系统状态" 
+            className="max-w-full max-h-[70vh] object-contain"
           />
-        </div>
-        <div className="h-20 flex items-center justify-center text-center">
-          <AnimatePresence mode="wait">
-            <motion.p 
-              key={stage}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="text-sm tracking-widest uppercase"
-            >
-              &gt; {messages[stage]}
-            </motion.p>
-          </AnimatePresence>
-        </div>
-      </motion.div>
+          <div className="text-sm tracking-widest uppercase">
+            &gt; 正在执行最终清除...
+          </div>
+        </motion.div>
+      ) : (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex flex-col items-center gap-8 max-w-md w-full text-center"
+        >
+          <AlertTriangle className="w-20 h-20 animate-pulse text-terminal-red" />
+          <h2 className="text-2xl font-bold tracking-[0.3em] text-center uppercase text-terminal-red">
+            清除失败
+          </h2>
+          <p className="text-sm tracking-widest uppercase text-terminal-red/80">
+            &gt; 系统完整性受损
+            <br />
+            &gt; 无法完成清除操作
+            <br />
+            &gt; 请联系系统管理员
+          </p>
+        </motion.div>
+      )}
       
       {/* Glitch noise overlay */}
       <motion.div 
