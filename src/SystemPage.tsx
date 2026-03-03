@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { AlertTriangle, Volume2, VolumeX, Zap, Database, Shield, Globe, RefreshCw, Save, X, Check, Server } from 'lucide-react';
 
 interface SystemPageProps {

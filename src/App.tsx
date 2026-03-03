@@ -64,14 +64,16 @@ import SystemTerminalPage from './SystemTerminalPage';
 
 // --- Page Components ---
 
-const SearchPage = ({ onLogout, onNavigate, archives, onSelectArchive, onSelectItem, bgMusicEnabled, onToggleBgMusic }: { 
+const SearchPage = ({ onLogout, onNavigate, archives, onSelectArchive, onSelectItem, bgMusicEnabled, onToggleBgMusic, isLightMode, onToggleTheme }: { 
   onLogout: () => void, 
   onNavigate: (view: 'search' | 'archive' | 'history' | 'terminal' | 'details' | 'submission' | 'system' | 'system-terminal') => void,
   archives: Record<string, { title: string, items: any[] }>,
   onSelectArchive: (id: string) => void,
   onSelectItem: (id: string) => void,
   bgMusicEnabled: boolean,
-  onToggleBgMusic: () => void
+  onToggleBgMusic: () => void,
+  isLightMode: boolean,
+  onToggleTheme: () => void
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Array<{ type: 'archive' | 'item', id: string, title: string, archiveId?: string, level?: string }>>([]);
@@ -150,7 +152,7 @@ const SearchPage = ({ onLogout, onNavigate, archives, onSelectArchive, onSelectI
   }, []);
 
   return (
-    <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden p-4 md:p-10 border-[4px] md:border-[16px] border-black bg-terminal-bg selection:bg-terminal-gold selection:text-terminal-bg">
+    <div className={`relative flex h-[100dvh] w-full flex-col overflow-hidden p-4 md:p-10 border-[4px] md:border-[16px] border-black ${isLightMode ? 'bg-white text-black selection:bg-terminal-gold selection:text-black' : 'bg-terminal-bg selection:bg-terminal-gold selection:text-terminal-bg'}`}>
       <div className="crt-overlay"></div>
       <div className="scanline"></div>
       
@@ -160,42 +162,57 @@ const SearchPage = ({ onLogout, onNavigate, archives, onSelectArchive, onSelectI
       <div className="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2 border-terminal-gold/40 z-50"></div>
       <div className="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-terminal-gold/40 z-50"></div>
 
-      <nav className="relative z-[150] w-full max-w-7xl mx-auto px-2 md:px-4 py-4 flex justify-end gap-3 md:gap-10 text-[10px] md:text-sm tracking-widest font-light">
+      <nav className="relative z-[150] w-full max-w-7xl mx-auto px-2 md:px-4 py-4 flex flex-wrap justify-end gap-2 md:gap-3 lg:gap-10 text-[10px] md:text-sm tracking-widest font-light">
         <button 
           onClick={() => onNavigate('archive')}
-          className="hover:text-terminal-gold transition-colors duration-300 flex items-center gap-1 md:gap-2 cursor-pointer group relative z-[150]"
+          className="hover:text-terminal-gold transition-colors duration-300 flex items-center gap-1 md:gap-2 cursor-pointer group relative z-[150] focus:outline-none focus:ring-2 focus:ring-terminal-gold"
+          aria-label="档案库"
         >
-          <Library className="w-3 h-3 md:w-4 md:h-4 group-hover:crt-glow" /> <span className="hidden xs:inline">档案库</span><span className="hidden sm:inline"> (Library)</span>
+          <Library className="w-3 h-3 md:w-4 md:h-4 group-hover:crt-glow" aria-hidden="true" /> <span className="hidden xs:inline">档案库</span><span className="hidden sm:inline"> (Library)</span>
         </button>
         <button 
           onClick={() => onNavigate('history')}
-          className="hover:text-terminal-gold transition-colors duration-300 flex items-center gap-1 md:gap-2 cursor-pointer group"
+          className="hover:text-terminal-gold transition-colors duration-300 flex items-center gap-1 md:gap-2 cursor-pointer group focus:outline-none focus:ring-2 focus:ring-terminal-gold"
+          aria-label="历史"
         >
-          <History className="w-3 h-3 md:w-4 md:h-4 group-hover:crt-glow" /> <span className="hidden xs:inline">历史</span><span className="hidden sm:inline"> (History)</span>
+          <History className="w-3 h-3 md:w-4 md:h-4 group-hover:crt-glow" aria-hidden="true" /> <span className="hidden xs:inline">历史</span><span className="hidden sm:inline"> (History)</span>
         </button>
         <button 
           onClick={() => onNavigate('submission')}
-          className="hover:text-terminal-gold transition-colors duration-300 flex items-center gap-1 md:gap-2 cursor-pointer group"
+          className="hover:text-terminal-gold transition-colors duration-300 flex items-center gap-1 md:gap-2 cursor-pointer group focus:outline-none focus:ring-2 focus:ring-terminal-gold"
+          aria-label="提交"
         >
-          <Upload className="w-3 h-3 md:w-4 md:h-4 group-hover:crt-glow" /> <span className="hidden xs:inline">提交</span><span className="hidden sm:inline"> (Submit)</span>
+          <Upload className="w-3 h-3 md:w-4 md:h-4 group-hover:crt-glow" aria-hidden="true" /> <span className="hidden xs:inline">提交</span><span className="hidden sm:inline"> (Submit)</span>
         </button>
         <button 
           onClick={onToggleBgMusic}
-          className={`hover:text-terminal-gold transition-colors duration-300 flex items-center gap-1 md:gap-2 cursor-pointer group ${bgMusicEnabled ? 'text-terminal-gold' : ''}`}
+          className={`hover:text-terminal-gold transition-colors duration-300 flex items-center gap-1 md:gap-2 cursor-pointer group ${bgMusicEnabled ? 'text-terminal-gold' : ''} focus:outline-none focus:ring-2 focus:ring-terminal-gold`}
+          aria-label={bgMusicEnabled ? '关闭音乐' : '开启音乐'}
+          aria-pressed={bgMusicEnabled}
         >
-          {bgMusicEnabled ? <Volume2 className="w-3 h-3 md:w-4 md:h-4 group-hover:crt-glow" /> : <VolumeX className="w-3 h-3 md:w-4 md:h-4" />} <span className="hidden xs:inline">{bgMusicEnabled ? '音乐' : '静音'}</span>
+          {bgMusicEnabled ? <Volume2 className="w-3 h-3 md:w-4 md:h-4 group-hover:crt-glow" aria-hidden="true" /> : <VolumeX className="w-3 h-3 md:w-4 md:h-4" aria-hidden="true" />} <span className="hidden xs:inline">{bgMusicEnabled ? '音乐' : '静音'}</span>
+        </button>
+        <button 
+          onClick={onToggleTheme}
+          className="hover:text-terminal-gold transition-colors duration-300 flex items-center gap-1 md:gap-2 cursor-pointer group focus:outline-none focus:ring-2 focus:ring-terminal-gold"
+          aria-label={isLightMode ? '切换到深色模式' : '切换到浅色模式'}
+          aria-pressed={isLightMode}
+        >
+          <Cpu className="w-3 h-3 md:w-4 md:h-4 group-hover:crt-glow" aria-hidden="true" /> <span className="hidden xs:inline">{isLightMode ? '深色' : '浅色'}</span><span className="hidden sm:inline"> ({isLightMode ? 'Dark' : 'Light'})</span>
         </button>
         <button 
           onClick={() => onNavigate('system')}
-          className="hover:text-terminal-gold transition-colors duration-300 flex items-center gap-1 md:gap-2 cursor-pointer group"
+          className="hover:text-terminal-gold transition-colors duration-300 flex items-center gap-1 md:gap-2 cursor-pointer group focus:outline-none focus:ring-2 focus:ring-terminal-gold"
+          aria-label="系统"
         >
-          <Settings className="w-3 h-3 md:w-4 md:h-4 group-hover:crt-glow" /> <span className="hidden xs:inline">系统</span><span className="hidden sm:inline"> (System)</span>
+          <Settings className="w-3 h-3 md:w-4 md:h-4 group-hover:crt-glow" aria-hidden="true" /> <span className="hidden xs:inline">系统</span><span className="hidden sm:inline"> (System)</span>
         </button>
         <button 
           onClick={onLogout}
-          className="hover:text-terminal-red transition-colors duration-300 flex items-center gap-1 md:gap-2 cursor-pointer group"
+          className="hover:text-terminal-red transition-colors duration-300 flex items-center gap-1 md:gap-2 cursor-pointer group focus:outline-none focus:ring-2 focus:ring-terminal-red"
+          aria-label="登出"
         >
-          <Lock className="w-3 h-3 md:w-4 md:h-4 group-hover:crt-glow-red" /> <span className="hidden xs:inline">登出</span><span className="hidden sm:inline"> (Logout)</span>
+          <Lock className="w-3 h-3 md:w-4 md:h-4 group-hover:crt-glow-red" aria-hidden="true" /> <span className="hidden xs:inline">登出</span><span className="hidden sm:inline"> (Logout)</span>
         </button>
       </nav>
 
@@ -233,7 +250,10 @@ const SearchPage = ({ onLogout, onNavigate, archives, onSelectArchive, onSelectI
               className="w-full bg-transparent border-none focus:ring-0 text-base md:text-lg font-light tracking-wider text-white/90 placeholder:text-terminal-gold/30 outline-none" 
               placeholder="请输入检索指令或档案编号..." 
               type="text"
+              aria-label="搜索档案"
+              aria-describedby="search-hint"
             />
+            <span id="search-hint" className="sr-only">按Enter选择第一个结果，按ESC关闭搜索</span>
             <div className="absolute right-4 hidden sm:flex items-center gap-2">
               <span className="text-[9px] font-mono text-terminal-gold/40 px-1.5 py-0.5 border border-terminal-gold/20 rounded-sm flex items-center gap-1">
                 <Command className="w-2 h-2" /> K
@@ -244,17 +264,23 @@ const SearchPage = ({ onLogout, onNavigate, archives, onSelectArchive, onSelectI
           {/* 搜索结果下拉框 */}
           {showResults && searchResults.length > 0 && (
             <motion.div 
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="absolute top-full left-0 right-0 mt-2 border border-terminal-gold/30 bg-black/95 backdrop-blur-sm rounded-sm overflow-hidden z-50"
+              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="absolute top-full left-0 right-0 mt-2 border border-terminal-gold/30 bg-black/95 backdrop-blur-sm rounded-sm overflow-hidden z-50 shadow-[0_10px_30px_rgba(144,133,81,0.15)]"
             >
               <div className="max-h-64 overflow-y-auto">
                 {searchResults.map((result, index) => (
-                  <div
+                  <motion.div
                     key={`${result.type}-${result.id}`}
                     onClick={() => handleResultClick(result)}
-                    className="px-4 py-3 border-b border-terminal-gold/10 hover:bg-terminal-gold/10 cursor-pointer transition-colors flex items-center justify-between group"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.2, delay: index * 0.05 }}
+                    whileHover={{ backgroundColor: 'rgba(144, 133, 81, 0.1)', x: 5 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="px-4 py-3 border-b border-terminal-gold/10 cursor-pointer flex items-center justify-between group"
                   >
                     <div className="flex items-center gap-3">
                       <span className="text-[10px] font-mono text-terminal-gold/50">
@@ -279,7 +305,7 @@ const SearchPage = ({ onLogout, onNavigate, archives, onSelectArchive, onSelectI
                         {result.level}
                       </span>
                     )}
-                  </div>
+                  </motion.div>
                 ))}
               </div>
               <div className="px-4 py-2 bg-terminal-gold/5 text-[9px] text-terminal-gold/40 font-mono text-center">
@@ -351,7 +377,7 @@ const PurgeOverlay = ({ onComplete }: { onComplete: () => void }) => {
           // 显示图片
           setShowImage(true);
           // 播放音频
-          const audio = new Audio('./spk_1772442700.wav');
+          const audio = new Audio('/spk_1772442700.wav');
           audioRef.current = audio;
           
           // 设置音频属性
@@ -438,7 +464,7 @@ const PurgeOverlay = ({ onComplete }: { onComplete: () => void }) => {
           className="flex flex-col items-center gap-8 w-full h-full relative"
         >
           <img 
-            src="./屏幕截图 2025-10-01 230554.png" 
+            src="/屏幕截图 2025-10-01 230554.png" 
             alt="系统状态" 
             className="w-full h-full object-cover absolute inset-0"
             onError={(e) => {
@@ -486,17 +512,36 @@ const PurgeOverlay = ({ onComplete }: { onComplete: () => void }) => {
 
 // --- Components for Archive Page ---
 
-const ArchivePage = ({ onNavigate, onSelectArchive, archives }: { onNavigate: (view: 'search' | 'archive' | 'history' | 'terminal' | 'details' | 'submission') => void, onSelectArchive: (id: string) => void, archives: Record<string, any> }) => {
+const ArchivePage = ({ onNavigate, onSelectArchive, archives, showGlitchEffect, isLightMode, onToggleTheme }: { onNavigate: (view: 'search' | 'archive' | 'history' | 'terminal' | 'details' | 'submission') => void, onSelectArchive: (id: string) => void, archives: Record<string, any>, showGlitchEffect?: boolean, isLightMode?: boolean, onToggleTheme?: () => void }) => {
   const folders = Object.entries(archives).map(([id, data]) => ({
     id,
     title: data.title,
-    date: data.items?.[0]?.time?.split(' ')[0] || '2024.01.01'
+    date: data.items?.[0]?.time?.split(' ')[0] || '2024.01.01',
+    hasLockedItems: data.items?.some((item: any) => item.isLocked) || false
   }));
 
   return (
-    <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden p-4 md:p-10 border-[4px] md:border-[16px] border-black bg-terminal-bg text-white font-sans selection:bg-terminal-gold selection:text-black">
+    <div className={`relative flex h-[100dvh] w-full flex-col overflow-hidden p-4 md:p-10 border-[4px] md:border-[16px] border-black ${isLightMode ? 'bg-white text-black font-sans selection:bg-terminal-gold selection:text-black' : 'bg-terminal-bg text-white font-sans selection:bg-terminal-gold selection:text-black'}`}>
       <div className="crt-overlay"></div>
       <div className="scanline"></div>
+      
+      {/* 信号干扰效果 */}
+      {showGlitchEffect && (
+        <>
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 0.3, 0, 0.5, 0, 0.2, 0] }}
+            transition={{ duration: 0.1, repeat: 5 }}
+            className="absolute inset-0 pointer-events-none bg-red-500/20 mix-blend-overlay z-[200]"
+          />
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 0.4, 0, 0.3, 0] }}
+            transition={{ duration: 0.15, repeat: 3 }}
+            className="absolute inset-0 pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSI0IiBoZWlnaHQ9IjQiIGZpbGw9IiMwMDAiLz48cmVjdCB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSIjZmZmIiBvcGFjaXR5PSIwLjEiLz48L3N2Zz4=')] opacity-30 mix-blend-screen z-[199]"
+          />
+        </>
+      )}
 
       {/* Decorative UI Elements (Corner Brackets) */}
       <div className="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-terminal-gold/40 z-50"></div>
@@ -508,15 +553,17 @@ const ArchivePage = ({ onNavigate, onSelectArchive, archives }: { onNavigate: (v
         <aside className="hidden md:flex w-16 border-r border-white/5 flex-col items-center py-12 gap-12 bg-black/20 backdrop-blur-md">
           <button 
             onClick={() => onNavigate('search')}
-            className="text-terminal-gold/60 cursor-pointer hover:text-terminal-gold transition-colors p-2 relative z-[150]"
+            className="text-terminal-gold/60 cursor-pointer hover:text-terminal-gold transition-colors p-2 relative z-[150] focus:outline-none focus:ring-2 focus:ring-terminal-gold"
+            aria-label="返回搜索页"
           >
-            <Terminal className="w-6 h-6" />
+            <Terminal className="w-6 h-6" aria-hidden="true" />
           </button>
           <nav className="flex flex-col gap-10 mt-12 flex-1">
-            <a className="[writing-mode:vertical-rl] text-orientation-mixed text-[11px] tracking-[0.4em] text-terminal-gold font-medium hover:text-white transition-colors" href="#">官方机构</a>
+            <a className="[writing-mode:vertical-rl] text-orientation-mixed text-[11px] tracking-[0.4em] text-terminal-gold font-medium hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-terminal-gold" href="#" aria-label="官方机构">官方机构</a>
             <button 
               onClick={() => onNavigate('history')}
-              className="[writing-mode:vertical-rl] text-orientation-mixed text-[11px] tracking-[0.4em] text-white/40 hover:text-white transition-colors cursor-pointer"
+              className="[writing-mode:vertical-rl] text-orientation-mixed text-[11px] tracking-[0.4em] text-white/40 hover:text-white transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-terminal-gold"
+              aria-label="历史年鉴"
             >
               历史年鉴
             </button>
@@ -546,46 +593,60 @@ const ArchivePage = ({ onNavigate, onSelectArchive, archives }: { onNavigate: (v
                 >
                   <History className="w-4 h-4" />
                 </button>
-                <p className="text-[7px] md:text-[10px] text-terminal-gold tracking-[0.3em] md:tracking-[0.6em] font-medium uppercase">Archive Access Portal</p>
+                <p className={`text-[7px] md:text-[10px] tracking-[0.3em] md:tracking-[0.6em] font-medium uppercase ${showGlitchEffect ? 'text-red-500 animate-pulse' : 'text-terminal-gold'}`}>Archive Access Portal</p>
               </div>
-              <h1 className="text-lg md:text-3xl font-light tracking-widest text-white/90">档案资料库</h1>
+              <h1 className={`text-lg md:text-3xl font-light tracking-widest ${showGlitchEffect ? 'text-red-400/90' : 'text-white/90'}`}>
+                {showGlitchEffect ? (
+                  <span className="animate-pulse">⚠ 系统异常 ⚠</span>
+                ) : '档案资料库'}
+              </h1>
             </div>
             <div className="flex items-center gap-3 md:gap-6 text-[7px] md:text-[10px] tracking-widest text-white/40 font-mono">
               <div className="flex flex-col items-start md:items-end">
                 <span>权限: A级特许</span>
-                <span>状态: 稳定</span>
+                <span className={showGlitchEffect ? 'text-red-500 animate-pulse' : ''}>
+                  {showGlitchEffect ? '状态: 异常' : '状态: 稳定'}
+                </span>
               </div>
               <div className="w-px h-5 md:h-8 bg-white/10"></div>
-              <div className="flex flex-col items-start md:items-end text-terminal-gold/60">
+              <div className={`flex flex-col items-start md:items-end ${showGlitchEffect ? 'text-red-500/60' : 'text-terminal-gold/60'}`}>
                 <span>UTC 08:00:44</span>
-                <span>NODE_0921_HY</span>
+                <span>{showGlitchEffect ? 'UNKNOWN' : 'NODE_0921_HY'}</span>
               </div>
             </div>
           </header>
 
           <div className="flex-1 flex justify-center pb-12 md:pb-32">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-3 md:gap-x-12 gap-y-8 md:gap-y-16 max-w-6xl w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 sm:gap-x-6 md:gap-x-8 lg:gap-x-12 gap-y-6 sm:gap-y-8 md:gap-y-12 lg:gap-y-16 max-w-6xl w-full">
               {folders.map((folder, i) => (
                 <motion.div 
                   key={folder.id}
                   initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
+                  animate={{ 
+                    opacity: showGlitchEffect && !folder.isMidnight ? [1, 0.3, 1, 0.5, 1] : 1, 
+                    y: 0,
+                    x: showGlitchEffect && !folder.isMidnight ? [0, -2, 2, -1, 0] : 0
+                  }}
+                  transition={{ 
+                    delay: i * 0.1,
+                    duration: showGlitchEffect ? 0.1 : 0.3,
+                    repeat: showGlitchEffect ? 4 : 0
+                  }}
                   onClick={() => {
-                  onSelectArchive(folder.id);
-                  onNavigate('terminal');
-                }}
-                className="group relative cursor-pointer hover:-translate-y-1 md:hover:-translate-y-3 transition-transform duration-300"
+                    onSelectArchive(folder.id);
+                    onNavigate('terminal');
+                  }}
+                  className="group relative cursor-pointer hover:-translate-y-1 md:hover:-translate-y-3 transition-transform duration-300"
                 >
                   <div className="absolute -top-3 md:-top-4 left-0 w-16 md:w-24 h-4 md:h-5 bg-terminal-gold/20 group-hover:bg-terminal-gold/40 transition-colors [clip-path:polygon(0%_0%,75%_0%,100%_100%,0%_100%)]"></div>
                   <div className="absolute -top-2.5 md:-top-3.5 left-1.5 md:left-2 text-[7px] md:text-[9px] font-bold text-terminal-gold group-hover:text-white transition-colors tracking-tighter font-mono">{folder.id}</div>
-                  <div className="bg-[#1a1a1a] border border-white/10 rounded-r-sm rounded-bl-sm aspect-[4/3] p-3 md:p-6 flex flex-col justify-between shadow-2xl">
+                  <div className="bg-[#1a1a1a] border border-white/10 border rounded-r-sm rounded-bl-sm aspect-[4/3] p-3 md:p-6 flex flex-col justify-between shadow-2xl">
                     <div className="space-y-1.5 md:space-y-2">
                       <div className="w-5 md:w-8 h-0.5 md:h-1 bg-terminal-gold/40"></div>
                       <h3 className="text-xs md:text-lg font-medium text-white/80 tracking-wide line-clamp-2">{folder.title}</h3>
                     </div>
                     <div className="text-[7px] md:text-[10px] text-white/30 tracking-widest border-t border-white/5 pt-1.5 md:pt-3 font-mono">
-                      更新: {folder.date}
+                      {folder.hasLockedItems ? '🔒 包含锁定档案' : `更新: ${folder.date}`}
                     </div>
                   </div>
                 </motion.div>
@@ -617,10 +678,13 @@ const ArchivePage = ({ onNavigate, onSelectArchive, archives }: { onNavigate: (v
 
 // --- Components for Terminal Page ---
 
-const TerminalPage = ({ archiveId, onNavigate, onSelectItem, archives, playSound }: { archiveId: string | null, onNavigate: (view: 'search' | 'archive' | 'history' | 'terminal' | 'details' | 'submission') => void, onSelectItem: (id: string) => void, archives: Record<string, { title: string, items: any[] }>, playSound: (type: 'click' | 'hover' | 'success' | 'error' | 'boot' | 'login' | 'button') => void }) => {
+const TerminalPage = ({ archiveId, onNavigate, onSelectItem, archives, playSound, showHiddenNames, onCharacterArchiveOpen, onUpdateArchives, isLightMode, onToggleTheme }: { archiveId: string | null, onNavigate: (view: 'search' | 'archive' | 'history' | 'terminal' | 'details' | 'submission') => void, onSelectItem: (id: string) => void, archives: Record<string, { title: string, items: any[] }>, playSound: (type: 'click' | 'hover' | 'success' | 'error' | 'boot' | 'login' | 'button') => void, showHiddenNames: string[], onCharacterArchiveOpen: () => void, onUpdateArchives: (archives: Record<string, { title: string, items: any[] }>) => void, isLightMode?: boolean, onToggleTheme?: () => void }) => {
   const [decryptionId, setDecryptionId] = useState<string | null>(null);
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [commandValue, setCommandValue] = useState('');
+  const [showPasswordPrompt, setShowPasswordPrompt] = useState<{ itemId: string, password: string, lockMessage?: string } | null>(null);
+  const [passwordValue, setPasswordValue] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
   useEffect(() => {
     if (decryptionId) {
@@ -644,17 +708,51 @@ const TerminalPage = ({ archiveId, onNavigate, onSelectItem, archives, playSound
       const index = parseInt(commandValue, 10);
       if (!isNaN(index) && index > 0 && index <= currentArchive.items.length) {
         const item = currentArchive.items[index - 1];
-        setDecryptionId(item.id);
+        if (item.isLocked) {
+          // 显示密码提示
+          setShowPasswordPrompt({ itemId: item.id, password: item.password, lockMessage: item.lockMessage });
+          setPasswordValue('');
+          setPasswordError('');
+        } else if (item.is404) {
+          // 404 页面跳转
+          onNavigate('details');
+          // 设置一个特殊的 itemId 表示 404
+          setTimeout(() => {
+            const event = new CustomEvent('show404', { detail: { itemId: item.id } });
+            window.dispatchEvent(event);
+          }, 100);
+        } else {
+          setDecryptionId(item.id);
+        }
         setCommandValue('');
       }
     }
   };
 
+  const handlePasswordSubmit = () => {
+    if (showPasswordPrompt && passwordValue === showPasswordPrompt.password) {
+      // 密码正确，解密档案
+      setDecryptionId(showPasswordPrompt.itemId);
+      setShowPasswordPrompt(null);
+      setPasswordError('');
+    } else {
+      // 密码错误
+      setPasswordError('密码错误，请重试');
+      playSound('error');
+    }
+  };
+
+  const handlePasswordKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handlePasswordSubmit();
+    }
+  };
+
   return (
-    <div className="relative flex h-[100dvh] w-full flex-col bg-black text-[#a0a0a0] font-mono antialiased overflow-hidden selection:bg-terminal-gold selection:text-black text-[10px] md:text-xs">
+    <div className="relative flex h-[100dvh] w-full flex-col font-mono antialiased overflow-hidden selection:bg-terminal-gold selection:text-black text-xs md:text-xs" style={{ backgroundColor: isLightMode ? 'white' : 'black', color: isLightMode ? 'black' : '#a0a0a0' }}>
       <div className="fixed inset-0 structural-grid pointer-events-none z-0"></div>
       
-      <header className="relative z-10 border-b border-terminal-gold/30 px-2 md:px-4 py-1 flex flex-col md:flex-row justify-between items-start md:items-center text-[8px] md:text-[10px] tracking-tighter text-[#4a4a4a] gap-1 md:gap-0">
+      <header className="relative z-10 border-b px-2 md:px-4 py-1 flex flex-col md:flex-row justify-between items-start md:items-center tracking-tighter gap-1 md:gap-0" style={{ borderBottomColor: isLightMode ? 'rgba(144, 133, 81, 0.2)' : 'rgba(144, 133, 81, 0.3)', fontSize: '8px', color: isLightMode ? '#6b7280' : '#6b7280' }}>
         <div className="flex flex-wrap gap-2 md:gap-6">
           <span className="text-terminal-gold/60">[红月核心：绝密指令终端 V4.0.96]</span>
           <span className="hidden sm:inline">COORD: [35.6895° N / 139.6917° E]</span>
@@ -676,11 +774,13 @@ const TerminalPage = ({ archiveId, onNavigate, onSelectItem, archives, playSound
             >
               <Terminal className="w-3 h-3 md:w-4 md:h-4" /> [ 返回档案库 ]
             </button>
-            <span className="text-[#4a4a4a]">/</span>
+            <span className="text-gray-500">/</span>
             <span className="text-terminal-gold font-bold tracking-widest truncate max-w-[150px] md:max-w-none">{currentArchive?.title || '未知档案'}</span>
           </div>
           <div className="text-[8px] md:text-[10px] text-terminal-gold/40">ARCHIVE_ID: {archiveId}</div>
         </div>
+
+
 
         <div className="flex-1 flex flex-col min-h-0 overflow-x-auto">
           <div className="md:hidden text-[7px] text-terminal-gold/30 mb-1 animate-pulse"> &gt;&gt; 左右滑动查看完整数据表 </div>
@@ -696,16 +796,33 @@ const TerminalPage = ({ archiveId, onNavigate, onSelectItem, archives, playSound
               {currentArchive?.items.map((item, idx) => (
                 <div 
                   key={item.id}
-                  onClick={() => setDecryptionId(item.id)}
-                  className="grid grid-cols-12 group cursor-pointer hover:bg-terminal-gold/5 transition-colors"
+                  onClick={() => {
+                    if (item.isLocked) {
+                      // 显示密码提示
+                      setShowPasswordPrompt({ itemId: item.id, password: item.password, lockMessage: item.lockMessage });
+                      setPasswordValue('');
+                      setPasswordError('');
+                    } else if (item.is404) {
+                      // 404 页面跳转
+                      onNavigate('details');
+                      // 设置一个特殊的 itemId 表示 404
+                      setTimeout(() => {
+                        const event = new CustomEvent('show404', { detail: { itemId: item.id } });
+                        window.dispatchEvent(event);
+                      }, 100);
+                    } else {
+                      setDecryptionId(item.id);
+                    }
+                  }}
+                  className={`grid grid-cols-12 group cursor-pointer hover:bg-terminal-gold/5 transition-colors ${item.isUnknown ? 'animate-pulse' : ''} ${item.isLocked ? 'opacity-70' : ''}`}
                 >
-                  <div className="col-span-2 border border-terminal-gold/50 p-2 border-t-0 border-r-0 text-terminal-gold font-bold flex items-center gap-1 md:gap-2">
+                  <div className={`col-span-2 border border-terminal-gold/50 p-2 border-t-0 border-r-0 font-bold flex items-center gap-1 md:gap-2 ${item.isUnknown ? 'text-red-500' : item.isLocked ? 'text-purple-500' : 'text-terminal-gold'}`}>
                     <span className="text-[7px] md:text-[8px] opacity-30 font-normal">[{idx + 1}]</span>
-                    {item.id}
+                    {item.isLocked ? '🔒 ' : ''}{item.id}
                   </div>
-                  <div className="col-span-5 border border-terminal-gold/50 p-2 border-t-0 border-r-0 text-[#a0a0a0]/60 group-hover:text-[#a0a0a0] truncate">{item.title}</div>
-                  <div className={`col-span-3 border border-terminal-gold/50 p-2 border-t-0 border-r-0 ${item.level === 'KETER' ? 'text-red-800' : 'text-terminal-gold/80'}`}>{item.level}</div>
-                  <div className="col-span-2 border border-terminal-gold/50 p-2 border-t-0 text-[#4a4a4a]">{item.time}</div>
+                  <div className={`col-span-5 border border-terminal-gold/50 p-2 border-t-0 border-r-0 truncate ${item.isUnknown ? 'text-red-400/80 group-hover:text-red-400' : item.isLocked ? 'text-purple-400/80 group-hover:text-purple-400' : 'text-gray-400/60 group-hover:text-gray-400'}`}>{item.title}</div>
+                  <div className={`col-span-3 border border-terminal-gold/50 p-2 border-t-0 border-r-0 ${item.isUnknown ? 'text-red-600' : item.isLocked ? 'text-purple-600' : item.level === 'KETER' ? 'text-red-800' : 'text-terminal-gold/80'}`}>{item.level}</div>
+                  <div className={`col-span-2 border border-terminal-gold/50 p-2 border-t-0 ${item.isUnknown ? 'text-red-500/60' : item.isLocked ? 'text-purple-500/60' : 'text-gray-500'}`}>{item.time}</div>
                 </div>
               ))}
               {/* Empty rows for aesthetic */}
@@ -720,6 +837,24 @@ const TerminalPage = ({ archiveId, onNavigate, onSelectItem, archives, playSound
             </div>
           </div>
         </div>
+
+        {/* 隐藏名字显示区域 */}
+        {showHiddenNames.length > 0 && (
+          <div className="absolute bottom-20 left-0 right-0 text-center z-20 pointer-events-none">
+            <div className="flex flex-wrap justify-center gap-2">
+              {showHiddenNames.map((name, index) => (
+                <div
+                  key={name}
+                  className="px-4 py-2 bg-red-950/50 border border-red-500/30"
+                >
+                  <span className="text-red-400 text-base tracking-[0.3em] font-mono animate-pulse">
+                    {name}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="mt-4 md:mt-8 border-t border-terminal-gold/20 pt-4 md:pt-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 md:gap-4 text-terminal-gold">
@@ -741,78 +876,135 @@ const TerminalPage = ({ archiveId, onNavigate, onSelectItem, archives, playSound
       </main>
 
       {/* Decryption Overlay */}
-      <AnimatePresence>
-        {decryptionId && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-sm"
-          >
-            <div className="relative w-full max-w-lg p-6 md:p-8 border border-terminal-gold bg-black shadow-[0_0_50px_rgba(144,133,81,0.2)]">
-              {/* Corner Brackets */}
-              <div className="absolute -top-1 -left-1 w-5 h-5 border-t-2 border-l-2 border-terminal-gold"></div>
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 border-b-2 border-r-2 border-terminal-gold"></div>
+      {decryptionId && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-sm">
+          <div className="relative w-full max-w-lg p-6 md:p-8 border border-terminal-gold bg-black shadow-[0_0_50px_rgba(144,133,81,0.2)]">
+            {/* Corner Brackets */}
+            <div className="absolute -top-1 -left-1 w-5 h-5 border-t-2 border-l-2 border-terminal-gold"></div>
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 border-b-2 border-r-2 border-terminal-gold"></div>
 
-              <div className="mb-4 md:mb-6 flex justify-between items-center text-[8px] md:text-[10px] text-terminal-gold/60 border-b border-terminal-gold/20 pb-2">
-                <span>INTEL_DECRYPT_PROTOCOL_v.7</span>
-                <span className="animate-pulse">正在解密扇区数据...</span>
-              </div>
+            <div className="mb-4 md:mb-6 flex justify-between items-center text-[8px] md:text-[10px] text-terminal-gold/60 border-b border-terminal-gold/20 pb-2">
+              <span>INTEL_DECRYPT_PROTOCOL_v.7</span>
+              <span className="animate-pulse">正在解密扇区数据...</span>
+            </div>
 
-              <div className="h-32 md:h-40 text-[#00ff41] text-[8px] md:text-[10px] leading-tight overflow-hidden font-mono mb-4 md:mb-6">
-                <motion.div
-                  initial={{ y: 0 }}
-                  animate={{ y: -200 }}
-                  transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                >
-                  01010111 01001000 01000001 01010100 00100000 01001001 01010011 00100000 01010100 01001000 01000101 00100000 01010010 01000101 01000100 00100000 01001101 01001111 01001111 01001110 00111111<br/>
-                  0x00FF01 0x44A291 0xBC8811 0x001122 0xFFEEAA 0x992211 0xCCBB00<br/>
-                  &gt; INITIATING_MEMETIC_FILTER<br/>
-                  &gt; BYPASSING_SECURITY_LAYER_01<br/>
-                  &gt; ACCESSING_CORE_FRAGMENTS<br/>
-                  &gt; STABILIZING_NEURAL_LINK<br/>
-                  &gt; [SUCCESS] 0x0021-X90<br/>
-                  11010010 10110101 01101111 11001101 01101111 11001101 01101111 00111111<br/>
-                  &gt; PARSING_SUBJECT_METADATA...<br/>
-                  &gt; DECRYPTING_SECTOR_0x99...<br/>
-                  01010111 01001000 01000001 01010100 00100000 01001001 01010011<br/>
-                  &gt; AUTHENTICATION_LOCKED<br/>
-                  &gt; RE-ROUTING_THROUGH_PROXY<br/>
-                  &gt; [WARNING] MEMETIC_HAZARD_DETECTED<br/>
-                  &gt; ATTEMPTING_RECOVERY...
-                </motion.div>
-              </div>
-
-              <div className="text-center">
-                <h2 className="text-lg md:text-xl text-white tracking-tighter mb-2">
-                  {currentArchive?.items.find(i => i.id === decryptionId)?.title}
-                </h2>
-                <div className="text-[8px] md:text-[9px] text-terminal-gold/40 tracking-widest uppercase mt-2 md:mt-4">
-                  DECRYPTING SECTOR... [DONE] / STABILIZING STREAM... [LOCKED]
-                </div>
-              </div>
-
-              <div className="mt-6 md:mt-8 flex justify-center">
-                <button 
-                  onClick={() => setDecryptionId(null)}
-                  className="px-6 py-2 border border-terminal-gold/40 text-[8px] md:text-[10px] text-terminal-gold hover:bg-terminal-gold hover:text-black transition-colors uppercase tracking-widest"
-                >
-                  [ 取消解密 ]
-                </button>
+            <div className="h-32 md:h-40 text-green-400 text-[8px] md:text-[10px] leading-tight overflow-hidden font-mono mb-4 md:mb-6">
+              <div className="animate-scroll">
+                01010111 01001000 01000001 01010100 00100000 01001001 01010011 00100000 01010100 01001000 01000101 00100000 01010010 01000101 01000100 00100000 01001101 01001111 01001111 01001110 00111111<br/>
+                0x00FF01 0x44A291 0xBC8811 0x001122 0xFFEEAA 0x992211 0xCCBB00<br/>
+                &gt; INITIATING_MEMETIC_FILTER<br/>
+                &gt; BYPASSING_SECURITY_LAYER_01<br/>
+                &gt; ACCESSING_CORE_FRAGMENTS<br/>
+                &gt; STABILIZING_NEURAL_LINK<br/>
+                &gt; [SUCCESS] 0x0021-X90<br/>
+                11010010 10110101 01101111 11001101 01101111 11001101 01101111 00111111<br/>
+                &gt; PARSING_SUBJECT_METADATA...<br/>
+                &gt; DECRYPTING_SECTOR_0x99...<br/>
+                01010111 01001000 01000001 01010100 00100000 01001001 01010011<br/>
+                &gt; AUTHENTICATION_LOCKED<br/>
+                &gt; RE-ROUTING_THROUGH_PROXY<br/>
+                &gt; [WARNING] MEMETIC_HAZARD_DETECTED<br/>
+                &gt; ATTEMPTING_RECOVERY...
               </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
+            <div className="text-center">
+              <h2 className="text-lg md:text-xl text-white tracking-tighter mb-2">
+                {currentArchive?.items.find(i => i.id === decryptionId)?.title}
+              </h2>
+              <div className="text-[8px] md:text-[9px] text-terminal-gold/40 tracking-widest uppercase mt-2 md:mt-4">
+                DECRYPTING SECTOR... [DONE] / STABILIZING STREAM... [LOCKED]
+              </div>
+            </div>
+
+            <div className="mt-6 md:mt-8 flex justify-center">
+              <button 
+                onClick={() => setDecryptionId(null)}
+                className="px-6 py-2 border border-terminal-gold/40 text-[8px] md:text-[10px] text-terminal-gold hover:bg-terminal-gold hover:text-black transition-colors uppercase tracking-widest"
+              >
+                [ 取消解密 ]
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Password Prompt */}
+      {showPasswordPrompt && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-sm">
+          <div className="relative w-full max-w-md p-6 md:p-8 border border-terminal-gold bg-black shadow-[0_0_50px_rgba(144,133,81,0.2)]">
+            {/* Corner Brackets */}
+            <div className="absolute -top-1 -left-1 w-5 h-5 border-t-2 border-l-2 border-terminal-gold"></div>
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 border-b-2 border-r-2 border-terminal-gold"></div>
+
+            <div className="mb-6 flex justify-between items-center text-[8px] md:text-[10px] text-terminal-gold/60 border-b border-terminal-gold/20 pb-2">
+              <span>SECURITY_ACCESS_PROTOCOL</span>
+              <span>需要密码验证</span>
+            </div>
+
+            <h3 className="text-lg md:text-xl font-bold text-terminal-gold mb-4 md:mb-6 text-center">
+              档案已锁定
+            </h3>
+
+            <p className="text-[10px] md:text-sm text-gray-400 mb-6 text-center">
+              该档案需要密码才能访问。请输入正确的密码以解锁档案。
+            </p>
+
+            {showPasswordPrompt?.lockMessage && (
+              <div className="mb-4 p-3 bg-terminal-gold/10 border border-terminal-gold/20 text-terminal-gold/80 text-[10px] text-center">
+                {showPasswordPrompt.lockMessage}
+              </div>
+            )}
+
+            {passwordError && (
+              <div className="mb-4 p-3 bg-red-950/30 border border-red-500/30 text-red-400 text-[10px] text-center">
+                {passwordError}
+              </div>
+            )}
+
+            <div className="mb-6">
+              <label className="block text-[10px] md:text-sm text-terminal-gold/80 mb-2">
+                密码
+              </label>
+              <input 
+                autoFocus
+                value={passwordValue}
+                onChange={(e) => setPasswordValue(e.target.value)}
+                onKeyDown={handlePasswordKeyDown}
+                className="w-full bg-black/50 border border-terminal-gold/30 p-3 text-terminal-gold text-sm focus:border-terminal-gold focus:outline-none"
+                type="password"
+                placeholder="请输入密码..."
+              />
+            </div>
+
+            <div className="flex gap-4">
+              <button 
+                onClick={() => setShowPasswordPrompt(null)}
+                className="flex-1 px-4 py-2 border border-terminal-gold/30 text-terminal-gold/80 hover:border-terminal-gold hover:text-terminal-gold transition-colors"
+              >
+                取消
+              </button>
+              <button 
+                onClick={handlePasswordSubmit}
+                className="flex-1 px-4 py-2 bg-terminal-gold text-black font-bold hover:bg-terminal-gold/80 transition-colors"
+              >
+                确认
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 // --- Main App Component ---
 
-const HistoryPage = ({ onNavigate, historyData }: { 
+const HistoryPage = ({ onNavigate, historyData, isLightMode, onToggleTheme }: { 
   onNavigate: (view: 'search' | 'archive' | 'history' | 'terminal' | 'details' | 'submission') => void,
-  historyData: any[]
+  historyData: any[],
+  isLightMode?: boolean,
+  onToggleTheme?: () => void
 }) => {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [activeEpoch, setActiveEpoch] = useState(1);
@@ -845,11 +1037,11 @@ const HistoryPage = ({ onNavigate, historyData }: {
   ) : [];
 
   return (
-    <div className="relative flex h-[100dvh] w-full flex-col bg-terminal-bg text-slate-100 overflow-hidden font-sans selection:bg-terminal-gold selection:text-black">
+    <div className={`relative flex h-[100dvh] w-full flex-col ${isLightMode ? 'bg-white text-black' : 'bg-terminal-bg text-slate-100'} overflow-hidden font-sans selection:bg-terminal-gold selection:text-black`}>
       <div className="crt-overlay opacity-20"></div>
       <div className="scanline opacity-10"></div>
       
-      <header className="z-40 flex flex-col md:flex-row items-start md:items-center justify-between border-b border-white/10 bg-terminal-bg/90 backdrop-blur-md px-4 md:px-6 py-2 gap-2 md:gap-0">
+      <header className="z-40 flex flex-col sm:flex-row items-start sm:items-center justify-between border-b backdrop-blur-md px-3 sm:px-4 md:px-6 py-2 gap-2 sm:gap-0" style={{ borderBottomColor: isLightMode ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)', backgroundColor: isLightMode ? 'rgba(255, 255, 255, 0.9)' : 'rgba(18, 17, 16, 0.9)' }}>
         <div className="flex items-center justify-between w-full md:w-auto gap-4 md:gap-6">
           <div className="flex items-center gap-2 text-terminal-gold">
             <Network className="w-4 h-4 md:w-5 md:h-5" />
@@ -1218,7 +1410,7 @@ const HistoryPage = ({ onNavigate, historyData }: {
         </div>
       </main>
 
-      <footer className="z-40 h-7 border-t border-white/10 bg-terminal-bg/95 flex items-center justify-between px-6 text-[9px] text-slate-500 font-bold tracking-widest uppercase font-mono">
+      <footer className={`z-40 h-7 border-t ${isLightMode ? 'border-black/10 bg-white/95' : 'border-white/10 bg-terminal-bg/95'} flex items-center justify-between px-6 text-[9px] ${isLightMode ? 'text-gray-500' : 'text-slate-500'} font-bold tracking-widest uppercase font-mono`}>
         <div className="flex gap-8 items-center">
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-terminal-gold/40"></span>
@@ -1382,12 +1574,77 @@ const BootSequence = ({ onComplete }: { onComplete: () => void }) => {
 
 // --- Components for Details Page ---
 
-const DetailsPage = ({ itemId, onNavigate, archives, onSelectItem }: { itemId: string | null, onNavigate: (view: 'search' | 'archive' | 'history' | 'terminal' | 'details' | 'submission') => void, archives: Record<string, { title: string, items: any[] }>, onSelectItem: (id: string) => void }) => {
+const DetailsPage = ({ itemId, onNavigate, archives, onSelectItem, collectedNames, isLightMode, onToggleTheme }: { itemId: string | null, onNavigate: (view: 'search' | 'archive' | 'history' | 'terminal' | 'details' | 'submission') => void, archives: Record<string, { title: string, items: any[] }>, onSelectItem: (id: string) => void, collectedNames: string[], isLightMode: boolean, onToggleTheme: () => void }) => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isZenMode, setIsZenMode] = useState(false);
-  const [isLightMode, setIsLightMode] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [show404, setShow404] = useState(false);
+  const [showIsaiahFinnInput, setShowIsaiahFinnInput] = useState(false);
+  const [finnInput, setFinnInput] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // 临时变量，用于修复黑屏问题
+  const midnightPalaceStage = 'normal';
+  const isUnknownArchive = false;
+  const showConfirm = false;
+  const isLoading = false;
+  const handleContinue = () => {};
+  const setMidnightPalaceChanged = () => {};
+  const setSelectedItemId = () => {};
+  
+  // 检查是否是以赛亚·芬恩
+  const isIsaiahFinn = itemId === 'CHR-008';
+
+  // 监听 404 事件
+  useEffect(() => {
+    const handleShow404 = (e: any) => {
+      setShow404(true);
+    };
+    window.addEventListener('show404', handleShow404);
+    return () => window.removeEventListener('show404', handleShow404);
+  }, []);
+
+  // 如果显示 404 页面
+  if (show404) {
+    return (
+      <div className="h-[100dvh] overflow-hidden bg-black flex items-center justify-center relative">
+        <div className="fixed inset-0 structural-grid pointer-events-none z-0 opacity-20"></div>
+        <div className="noise-overlay"></div>
+        
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="relative z-10 text-center max-w-lg mx-auto px-6"
+        >
+          <div className="mb-8">
+            <motion.div 
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="text-8xl mb-4 font-mono text-red-600"
+            >
+              404
+            </motion.div>
+            <h1 className="text-xl md:text-2xl font-bold text-white/80 tracking-widest mb-4">
+              文件损坏或已丢失
+            </h1>
+            <p className="text-white/40 text-sm tracking-wider">
+              请联系管理员恢复数据
+            </p>
+          </div>
+          
+          <button 
+            onClick={() => {
+              setShow404(false);
+              onNavigate('archive');
+            }}
+            className="px-8 py-3 border border-white/20 text-white/60 hover:text-white hover:border-white/40 transition-all text-sm tracking-widest"
+          >
+            [ 返回档案库 ]
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
 
   // Flatten all items for navigation
   const allItems = Object.values(archives).flatMap(archive => archive.items);
@@ -1406,6 +1663,85 @@ const DetailsPage = ({ itemId, onNavigate, archives, onSelectItem }: { itemId: s
       containerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
+
+  // Mock data for different items
+  const itemContent: Record<string, any> = {
+    'ANM-072': {
+      code: 'RED_MOON_INCIDENT',
+      title: '赤月事件总览：',
+      subtitle: '维度侵蚀与认知坍塌',
+      date: '2144.05.12',
+      loc: 'ANTARCTICA',
+      auth: 'OVERSEER',
+      quote: '在第二次“赤月”升起之后的第十四个地球日，位于南极洲的深空观测站首次记录到了非自然频率的电磁波动。',
+      section1: '根据现场勘查，物理常数在受灾区域发生了显著改变。重力加速度在局部范围内波动幅度达到了 14.5% RECOVERY_REQUIRED。更令人不安的是，目击者报告称在红光笼罩下，他们能够看到“已经逝去的时间线”在空气中交织。',
+      interview: '“月亮不是红色的，它是...它是某种巨大的、正在注视着我们的角膜。当它睁开时，天空便裂开了。”',
+      section2: '根据《赤月防御协定》，任何接触过赤月直射光超过 DATA_EXPUNGED 的人员必须立即接受认知清洗。初步症状包括：',
+      symptoms: ['对自身生物特征的排斥感', '能够听见低频的、无法解析的群体低语', '在镜子中观察到 NON_HUMAN_OCULAR', '强烈的寻求“归乡”的冲动'],
+      image: 'https://picsum.photos/seed/redmoon/1200/800?grayscale'
+    },
+    'ANM-105': {
+      code: 'DEFENSE_PROTOCOL',
+      title: '枢纽防御协议：',
+      subtitle: '第四阶段实施细则',
+      date: '2144.03.11',
+      loc: 'CORE_NEXUS',
+      auth: 'COMMANDER',
+      quote: '防御不是为了生存，而是为了推迟必然的终结。',
+      section1: '第四阶段协议涉及对核心区域的物理封锁。所有非必要人员已撤离至地下避难所。目前，核心同步率保持在 88.2%，处于可控范围边缘。',
+      interview: '“如果大门关不上，我们就把自己锁在里面。”',
+      section2: '封锁期间的资源配给将严格按照贡献度执行。任何试图破坏封锁的行为将被视为叛国。',
+      symptoms: ['对封闭空间的异常适应', '对外部信号的极度恐惧', '集体性幻觉：看到墙壁在呼吸'],
+      image: 'https://picsum.photos/seed/defense/1200/800?grayscale'
+    },
+    'CHR-008': {
+      code: 'ISAIAH_FINN',
+      title: '以赛亚·芬恩',
+      subtitle: '？？？',
+      date: '新历43年',
+      loc: 'UNKNOWN',
+      auth: 'RESTRICTED',
+      quote: '"如果还有别的路呢？如果有，为什么我们不走？"',
+      section1: '新历43年，以赛亚·芬恩在家中"自然死亡"。他留下的最后一句话是："如果还有别的路呢？如果有，为什么我们不走？"\n\n他的手稿《红月时代伦理史》全部失踪。',
+      interview: '',
+      section2: '',
+      symptoms: [],
+      image: 'https://picsum.photos/seed/isaiah/1200/800?grayscale'
+    }
+  };
+  
+  // Find metadata from archives
+  const itemMetadata = Object.values(archives).flatMap(a => a.items).find(i => i.id === itemId);
+
+  // 内容获取逻辑
+  const content = itemMetadata ? {
+    code: 'UPLOADED_DOCUMENT',
+    title: itemMetadata.title,
+    subtitle: itemMetadata.files && itemMetadata.files.length > 0 ? `源文件: ${itemMetadata.files.map(f => f.name).join(', ')}` : '管理员上传文档',
+    date: itemMetadata.time.split(' ')[0],
+    loc: 'REMOTE_UPLOAD',
+    auth: 'ADMIN_OVERRIDE',
+    quote: '',
+    section1: itemMetadata.fileContent || (itemMetadata.files && itemMetadata.files.filter(f => !f.type.startsWith('image/')).map(f => f.content).join('\n\n---\n\n')) || '该文档未包含文字内容。',
+    interview: '',
+    section2: '',
+    symptoms: [],
+    images: itemMetadata.files ? itemMetadata.files.filter(f => f.type.startsWith('image/')) : [],
+    image: itemMetadata.files ? (itemMetadata.files.find(f => f.type.startsWith('image/'))?.content || 'https://picsum.photos/seed/document/1200/800?grayscale') : 'https://picsum.photos/seed/document/1200/800?grayscale'
+  } : (itemId && itemContent[itemId] ? itemContent[itemId] : {
+    code: 'UNKNOWN_DATA',
+    title: '数据缺失：',
+    subtitle: '该档案尚未录入详细内容',
+    date: 'UNKNOWN',
+    loc: 'UNKNOWN',
+    auth: 'SYSTEM',
+    quote: '无法在当前数据库中检索到该对象的详细描述。',
+    section1: '该档案可能已被删除、移动或尚未由管理员完成录入。请联系系统管理员获取进一步权限。',
+    interview: '“没有任何记录。就像它从未存在过一样。”',
+    section2: '如果这是由于系统错误导致的，请尝试重新同步数据库。',
+    symptoms: ['数据损坏', '访问权限不足', '文件未找到'],
+    image: 'https://picsum.photos/seed/unknown/1200/800?grayscale'
+  });
 
   // 下载文件功能
   const downloadFile = (file: any) => {
@@ -1574,75 +1910,14 @@ const DetailsPage = ({ itemId, onNavigate, archives, onSelectItem }: { itemId: s
     }
   };
 
-  // Mock data for different items
-  const itemContent: Record<string, any> = {
-    'ANM-072': {
-      code: 'RED_MOON_INCIDENT',
-      title: '赤月事件总览：',
-      subtitle: '维度侵蚀与认知坍塌',
-      date: '2144.05.12',
-      loc: 'ANTARCTICA',
-      auth: 'OVERSEER',
-      quote: '在第二次“赤月”升起之后的第十四个地球日，位于南极洲的深空观测站首次记录到了非自然频率的电磁波动。',
-      section1: '根据现场勘查，物理常数在受灾区域发生了显著改变。重力加速度在局部范围内波动幅度达到了 14.5% RECOVERY_REQUIRED。更令人不安的是，目击者报告称在红光笼罩下，他们能够看到“已经逝去的时间线”在空气中交织。',
-      interview: '“月亮不是红色的，它是...它是某种巨大的、正在注视着我们的角膜。当它睁开时，天空便裂开了。”',
-      section2: '根据《赤月防御协定》，任何接触过赤月直射光超过 DATA_EXPUNGED 的人员必须立即接受认知清洗。初步症状包括：',
-      symptoms: ['对自身生物特征的排斥感', '能够听见低频的、无法解析的群体低语', '在镜子中观察到 NON_HUMAN_OCULAR', '强烈的寻求“归乡”的冲动'],
-      image: 'https://picsum.photos/seed/redmoon/1200/800?grayscale'
-    },
-    'ANM-105': {
-      code: 'DEFENSE_PROTOCOL',
-      title: '枢纽防御协议：',
-      subtitle: '第四阶段实施细则',
-      date: '2144.03.11',
-      loc: 'CORE_NEXUS',
-      auth: 'COMMANDER',
-      quote: '防御不是为了生存，而是为了推迟必然的终结。',
-      section1: '第四阶段协议涉及对核心区域的物理封锁。所有非必要人员已撤离至地下避难所。目前，核心同步率保持在 88.2%，处于可控范围边缘。',
-      interview: '“如果大门关不上，我们就把自己锁在里面。”',
-      section2: '封锁期间的资源配给将严格按照贡献度执行。任何试图破坏封锁的行为将被视为叛国。',
-      symptoms: ['对封闭空间的异常适应', '对外部信号的极度恐惧', '集体性幻觉：看到墙壁在呼吸'],
-      image: 'https://picsum.photos/seed/defense/1200/800?grayscale'
-    }
-  };
 
-  // Find metadata from archives
-  const itemMetadata = Object.values(archives).flatMap(a => a.items).find(i => i.id === itemId);
-
-  const content = itemMetadata ? {
-    code: 'UPLOADED_DOCUMENT',
-    title: itemMetadata.title,
-    subtitle: itemMetadata.files && itemMetadata.files.length > 0 ? `源文件: ${itemMetadata.files.map(f => f.name).join(', ')}` : '管理员上传文档',
-    date: itemMetadata.time.split(' ')[0],
-    loc: 'REMOTE_UPLOAD',
-    auth: 'ADMIN_OVERRIDE',
-    quote: '',
-    section1: itemMetadata.fileContent || (itemMetadata.files && itemMetadata.files.filter(f => !f.type.startsWith('image/')).map(f => f.content).join('\n\n---\n\n')) || '该文档未包含文字内容。',
-    interview: '',
-    section2: '',
-    symptoms: [],
-    images: itemMetadata.files ? itemMetadata.files.filter(f => f.type.startsWith('image/')) : [],
-    image: itemMetadata.files ? (itemMetadata.files.find(f => f.type.startsWith('image/'))?.content || 'https://picsum.photos/seed/document/1200/800?grayscale') : 'https://picsum.photos/seed/document/1200/800?grayscale'
-  } : (itemId && itemContent[itemId] ? itemContent[itemId] : {
-    code: 'UNKNOWN_DATA',
-    title: '数据缺失：',
-    subtitle: '该档案尚未录入详细内容',
-    date: 'UNKNOWN',
-    loc: 'UNKNOWN',
-    auth: 'SYSTEM',
-    quote: '无法在当前数据库中检索到该对象的详细描述。',
-    section1: '该档案可能已被删除、移动或尚未由管理员完成录入。请联系系统管理员获取进一步权限。',
-    interview: '“没有任何记录。就像它从未存在过一样。”',
-    section2: '如果这是由于系统错误导致的，请尝试重新同步数据库。',
-    symptoms: ['数据损坏', '访问权限不足', '文件未找到'],
-    image: 'https://picsum.photos/seed/unknown/1200/800?grayscale'
-  });
 
   return (
     <div 
       ref={containerRef}
       onScroll={handleScroll}
       className={`h-[100dvh] overflow-y-auto font-mono relative transition-colors duration-700 selection:bg-terminal-gold/30 ${isLightMode ? 'bg-[#f5f5f0] text-black selection:text-black' : 'bg-terminal-bg text-slate-300 selection:text-terminal-gold'}`}
+      aria-label="档案详情页面"
     >
       <div className={`fixed inset-0 structural-grid pointer-events-none z-0 transition-opacity duration-700 ${isLightMode ? 'opacity-5' : 'opacity-20'}`}></div>
       <div className="noise-overlay"></div>
@@ -1691,13 +1966,15 @@ const DetailsPage = ({ itemId, onNavigate, archives, onSelectItem }: { itemId: s
         </div>
       </header>
 
-      <div className={`layout-container flex flex-col items-center pb-20 px-4 md:px-8 relative z-10 transition-all duration-700 ${isZenMode ? 'pt-8 md:pt-12' : 'pt-20 md:pt-24'}`}>
+      <div className={`layout-container flex flex-col items-center pb-12 sm:pb-16 md:pb-20 px-3 sm:px-4 md:px-8 relative z-10 transition-all duration-700 ${isZenMode ? 'pt-4 sm:pt-6 md:pt-12' : 'pt-12 sm:pt-16 md:pt-24'}`}>
         <div className={`max-w-4xl w-full flex flex-row justify-between items-center mb-6 md:mb-8 gap-4 transition-all duration-700 ${isZenMode ? 'opacity-0 -translate-y-4 pointer-events-none' : 'opacity-100 translate-y-0'}`}>
           <nav className="flex gap-1 md:gap-2 font-mono">
-            <button onClick={() => onNavigate('terminal')} className={`terminal-btn text-[9px] md:text-xs ${isLightMode ? 'border-black/20 text-black/60 hover:border-black hover:text-black' : ''}`}>[ <GlitchText text="返回" /> ]</button>
+            <button onClick={() => onNavigate('terminal')} className={`terminal-btn text-[9px] md:text-xs ${isLightMode ? 'border-black/20 text-black/60 hover:border-black hover:text-black' : ''} focus:outline-none focus:ring-2 focus:ring-terminal-gold`} aria-label="返回终端">[ <GlitchText text="返回" /> ]</button>
             <button 
-              onClick={() => setIsLightMode(!isLightMode)} 
-              className={`terminal-btn text-[9px] md:text-xs transition-all ${isLightMode ? 'bg-black text-white border-black' : 'active'}`}
+              onClick={onToggleTheme} 
+              className={`terminal-btn text-[9px] md:text-xs transition-all ${isLightMode ? 'bg-black text-white border-black' : 'active'} focus:outline-none focus:ring-2 focus:ring-terminal-gold`}
+              aria-label={isLightMode ? '切换到终端模式' : '切换到阅读模式'}
+              aria-pressed={isLightMode}
             >
               [ <GlitchText text={isLightMode ? '终端' : '阅读'} /> ]
             </button>
@@ -1709,10 +1986,10 @@ const DetailsPage = ({ itemId, onNavigate, archives, onSelectItem }: { itemId: s
           </div>
         </div>
 
-        <main className={`max-w-4xl w-full border backdrop-blur-sm relative overflow-hidden transition-all duration-700 ${isLightMode ? 'bg-white border-black/10 shadow-xl' : 'bg-black/85 border-terminal-gold/30'}`}>
+        <main className={`max-w-4xl w-full border backdrop-blur-sm relative overflow-hidden transition-all duration-700 ${isLightMode ? 'bg-white border-black/10 shadow-xl' : 'bg-black/85 border-terminal-gold/30'}`} aria-label="档案内容">
           <div className={`scanline ${isLightMode ? 'opacity-0' : ''}`}></div>
-          <div className={`border-b px-6 py-3 flex justify-between items-center transition-colors ${isLightMode ? 'bg-black/5 border-black/10' : 'bg-terminal-gold/5 border-terminal-gold/30'}`}>
-            <div className="flex items-center gap-4">
+          <div className={`border-b px-4 sm:px-6 py-2 sm:py-3 flex justify-between items-center transition-colors ${isLightMode ? 'bg-black/5 border-black/10' : 'bg-terminal-gold/5 border-terminal-gold/30'}`}>
+            <div className="flex items-center gap-3 sm:gap-4">
               <div className="flex gap-1.5">
                 <div className={`w-2 h-2 border ${isLightMode ? 'border-black/20' : 'border-terminal-gold/50'}`}></div>
                 <div className={`w-2 h-2 border ${isLightMode ? 'border-black/20' : 'border-terminal-gold/50'}`}></div>
@@ -1725,7 +2002,7 @@ const DetailsPage = ({ itemId, onNavigate, archives, onSelectItem }: { itemId: s
             </div>
           </div>
 
-          <article className="p-6 md:p-16 space-y-8 md:space-y-12 relative">
+          <article className="p-4 sm:p-6 md:p-16 space-y-6 sm:space-y-8 md:space-y-12 relative">
             {/* Technical Micro-labels */}
             <div className="absolute top-0 left-0 w-full flex justify-between px-4 md:px-8 py-2 pointer-events-none">
               <span className="text-[7px] md:text-[8px] font-mono opacity-20 uppercase tracking-[0.2em] md:tracking-[0.3em]">Sector: 09-Alpha // Node: Core_Sync</span>
@@ -1770,216 +2047,246 @@ const DetailsPage = ({ itemId, onNavigate, archives, onSelectItem }: { itemId: s
               </div>
             </header>
 
-            <section className={`space-y-6 md:space-y-10 leading-relaxed transition-colors ${isLightMode ? 'text-black/80' : 'text-slate-300'}`}>
-              <div className="flex items-start gap-2 md:gap-4">
-                <span className={`text-2xl md:text-5xl font-bold leading-none mt-1 transition-colors ${isLightMode ? 'text-black/20' : 'text-terminal-gold'}`}>“</span>
-                <p className={`text-sm md:text-2xl font-serif italic leading-snug transition-colors ${isLightMode ? 'text-black' : 'text-slate-200'}`}>
-                  {content.quote}
-                </p>
-              </div>
-
-              <div className="space-y-4 md:space-y-6">
-                <h3 className={`font-mono text-sm md:text-lg font-bold flex items-center gap-2 md:gap-3 transition-colors ${isLightMode ? 'text-black' : 'text-terminal-gold'}`}>
-                  <span className={`w-1 h-3 md:h-5 transition-colors ${isLightMode ? 'bg-black' : 'bg-terminal-gold'}`}></span>
-                  01. 事件描述：维度裂隙
-                </h3>
-                <div className="font-serif text-sm md:text-lg opacity-90 overflow-hidden">
-                  {(() => {
-                    const text = content.section1 || '';
-                    const images = content.images || [];
-                    
-                    // If no images or legacy string images, just render text
-                    if (images.length === 0 || typeof images[0] === 'string') {
-                      return (
-                        <>
-                          {images.length > 0 && typeof images[0] === 'string' && (
-                            <div className="grid grid-cols-1 gap-8 mb-8 clear-both mt-8">
-                              {images.map((img: any, idx: number) => (
-                                <div key={idx} className={`border p-2 transition-colors ${isLightMode ? 'border-black/10' : 'border-terminal-gold/20'}`}>
-                                  <img src={img} alt={`Content ${idx}`} className="w-full grayscale hover:grayscale-0 transition-all duration-500" />
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                          <div className="whitespace-pre-wrap leading-relaxed">
-                            {text}
-                          </div>
-                        </>
-                      );
-                    }
-
-                    // For new object-based images, support placeholders and floating
-                    const referencedNames = new Set();
-                    const parts = text.split(/(\[IMG_.*?\])/g);
-                    
-                    const renderMedia = (file: any, idx: number) => {
-                      // 音频文件
-                      if (file.type && file.type.startsWith('audio/')) {
-                        return (
-                          <div 
-                            key={`audio-${idx}`} 
-                            className={`border p-4 my-4 transition-colors ${isLightMode ? 'border-black/10 bg-black/5' : 'border-terminal-gold/20 bg-terminal-gold/5'}`}
-                          >
-                            <div className="flex items-center gap-3 mb-2">
-                              <svg className="w-5 h-5 text-terminal-gold" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4c.73 0 1.41-.21 2-.55V21h2v-8h-2zM10 16c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
-                              </svg>
-                              <span className="text-xs font-mono uppercase">{file.name}</span>
-                            </div>
-                            <audio 
-                              controls 
-                              src={file.content} 
-                              className="w-full"
-                            />
-                          </div>
-                        );
-                      }
-                      
-                      // 图片文件
-                      return (
-                        <div 
-                          key={`img-${idx}`} 
-                          style={{ 
-                            float: file.align === 'none' ? 'none' : (file.align || 'left'), 
-                            width: file.width || '50%',
-                            height: file.height === 'auto' ? 'auto' : file.height,
-                            margin: file.align === 'right' ? '0 0 1.5rem 1.5rem' : (file.align === 'left' ? '0 1.5rem 1.5rem 0' : '0 0 1.5rem 0')
-                          }}
-                          className={`border p-1 transition-colors ${isLightMode ? 'border-black/10' : 'border-terminal-gold/20'} ${file.align === 'none' ? 'mx-auto mb-8 clear-both' : ''}`}
-                        >
-                          <img src={file.content} alt={file.name} className="w-full h-full grayscale hover:grayscale-0 transition-all duration-500" style={{ objectFit: file.height === 'auto' ? 'contain' : 'fill' }} />
-                          <div className={`mt-1 text-[8px] font-mono uppercase transition-colors ${isLightMode ? 'text-black/30' : 'text-terminal-gold/40'}`}>
-                            IMG_REF: {file.name}
-                          </div>
-                        </div>
-                      );
-                    };
-
-                    // Find unreferenced images to float at the top
-                    const unreferencedImages = images.filter((f: any) => {
-                      const isRef = text.includes(`[IMG_${f.name}]`);
-                      if (isRef) referencedNames.add(f.name);
-                      return !isRef;
-                    });
-
-                    return (
-                      <>
-                        {unreferencedImages.map((f: any, i: number) => renderMedia(f, i))}
-                        <div className="whitespace-pre-wrap leading-relaxed inline">
-                          {parts.map((part, i) => {
-                            const match = part.match(/\[IMG_(.*?)\]/);
-                            if (match) {
-                              const name = match[1];
-                              const file = images.find((f: any) => f.name === name);
-                              if (file) return renderMedia(file, i);
-                            }
-                            return <span key={i}>{part}</span>;
-                          })}
-                        </div>
-                      </>
-                    );
-                  })()}
-                </div>
-              </div>
-
-              {content.section2 && (
-                <div className="space-y-6">
-                  <h3 className={`font-mono text-lg font-bold flex items-center gap-3 transition-colors ${isLightMode ? 'text-black' : 'text-terminal-gold'}`}>
-                    <span className={`w-1 h-5 transition-colors ${isLightMode ? 'bg-black' : 'bg-terminal-gold'}`}></span>
-                    02. 深度解析：因果纠缠
-                  </h3>
-                  <div className="font-serif text-lg opacity-90 leading-relaxed">
-                    {content.section2}
+            <div>
+              {midnightPalaceStage === 'info' && (
+                <section className="space-y-6 md:space-y-10 leading-relaxed">
+                  <div className="space-y-4 md:space-y-6">
+                    <h3 className={`font-mono text-sm md:text-lg font-bold flex items-center gap-2 md:gap-3 transition-colors ${isLightMode ? 'text-black' : 'text-terminal-gold'}`}>
+                      <span className={`w-1 h-3 md:h-5 transition-colors ${isLightMode ? 'bg-black' : 'bg-terminal-gold'}`}></span>
+                      状态：档案缺失
+                    </h3>
+                    <div className="font-serif text-sm md:text-lg opacity-90">
+                      <p className="mb-4">说明：该地点不在公开记录范围内。</p>
+                      <p>提示：寻找七个人的名字。他们签过字。他们早已不在。但有人在看着。</p>
+                    </div>
                   </div>
-                </div>
+                </section>
               )}
-
-              {content.interview && (
-                <div className={`p-8 border-l-2 italic transition-colors ${isLightMode ? 'border-black/10 bg-black/5 text-black/70' : 'border-terminal-gold/20 bg-terminal-gold/5 text-slate-400'}`}>
-                  <div className="flex items-start gap-4">
-                    <span className="text-2xl font-bold opacity-20">“</span>
-                    <p className="text-lg">
-                      {content.interview}
+              {midnightPalaceStage !== 'info' && (
+                <section className={`space-y-6 md:space-y-10 leading-relaxed transition-colors ${isLightMode ? 'text-black/80' : 'text-slate-300'}`}>
+                  <div className="flex items-start gap-2 md:gap-4">
+                    <span className={`text-2xl md:text-5xl font-bold leading-none mt-1 transition-colors ${isLightMode ? 'text-black/20' : 'text-terminal-gold'}`}>“</span>
+                    <p className={`text-sm md:text-2xl font-serif italic leading-snug transition-colors ${isLightMode ? 'text-black' : 'text-slate-200'}`}>
+                      {content.quote}
                     </p>
                   </div>
-                </div>
-              )}
 
-              <div className={`relative border p-1 transition-colors ${isLightMode ? 'border-black/10' : 'border-terminal-gold/20'}`}>
-                <div className="absolute top-4 right-4 z-20 flex gap-2">
-                  <span className={`text-[8px] border px-2 py-0.5 transition-colors ${isLightMode ? 'bg-white/80 text-black border-black/20' : 'bg-black/80 text-terminal-gold border-terminal-gold/30'}`}>HISTOGRAM: SIG_PEAK</span>
-                </div>
-                <img 
-                  alt="Space anomaly" 
-                  className={`w-full grayscale contrast-125 transition-all duration-700 ${isLightMode ? 'opacity-80 hover:opacity-100' : 'opacity-40 hover:opacity-70'}`} 
-                  src={content.image}
-                  referrerPolicy="no-referrer"
-                />
-                <div className={`absolute inset-0 pointer-events-none transition-colors ${isLightMode ? 'bg-black/5' : 'bg-terminal-gold/5'}`}></div>
-                <div className={`mt-2 flex justify-between font-mono text-[9px] uppercase transition-colors ${isLightMode ? 'text-black/30' : 'text-terminal-gold/40'}`}>
-                  <span>Capture_ID: ANOMALY_S_POLE_2144</span>
-                  <span>Source: SAT_ORBIT_9</span>
-                </div>
-              </div>
+                  <div className="space-y-4 md:space-y-6">
+                    <h3 className={`font-mono text-sm md:text-lg font-bold flex items-center gap-2 md:gap-3 transition-colors ${isLightMode ? 'text-black' : 'text-terminal-gold'}`}>
+                      <span className={`w-1 h-3 md:h-5 transition-colors ${isLightMode ? 'bg-black' : 'bg-terminal-gold'}`}></span>
+                      01. 事件描述：维度裂隙
+                    </h3>
+                    <div className="font-serif text-sm md:text-lg opacity-90 overflow-hidden">
+                      {(() => {
+                        const text = content.section1 || '';
+                        const images = content.images || [];
+                       
+                        // If no images or legacy string images, just render text
+                        if (images.length === 0 || typeof images[0] === 'string') {
+                          return (
+                            <>
+                              {images.length > 0 && typeof images[0] === 'string' && (
+                                <div className="grid grid-cols-1 gap-8 mb-8 clear-both mt-8">
+                                  {images.map((img: any, idx: number) => (
+                                    <div key={idx} className={`border p-2 transition-colors ${isLightMode ? 'border-black/10' : 'border-terminal-gold/20'}`}>
+                                      <img src={img} alt={`Content ${idx}`} className="w-full grayscale hover:grayscale-0 transition-all duration-500" />
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              <div className="whitespace-pre-wrap leading-relaxed">
+                                {text}
+                              </div>
+                            </>
+                          );
+                        }
 
-              <div className={`mt-12 border-t pt-8 transition-colors ${isLightMode ? 'border-black/10' : 'border-terminal-gold/20'}`}>
-                {/* Removed Security Breach Box as per request */}
-              </div>
+                        // For new object-based images, support placeholders and floating
+                        const referencedNames = new Set();
+                        const parts = text.split(/(\[IMG_.*?\])/g);
+                        
+                        const renderMedia = (file: any, idx: number) => {
+                          // 音频文件
+                          if (file.type && file.type.startsWith('audio/')) {
+                            return (
+                              <div 
+                                key={`audio-${idx}`} 
+                                className={`border p-4 my-4 transition-colors ${isLightMode ? 'border-black/10 bg-black/5' : 'border-terminal-gold/20 bg-terminal-gold/5'}`}
+                              >
+                                <div className="flex items-center gap-3 mb-2">
+                                  <svg className="w-5 h-5 text-terminal-gold" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4c.73 0 1.41-.21 2-.55V21h2v-8h-2zM10 16c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+                                  </svg>
+                                  <span className="text-xs font-mono uppercase">{file.name}</span>
+                                </div>
+                                <audio 
+                                  controls 
+                                  src={file.content} 
+                                  className="w-full"
+                                />
+                              </div>
+                            );
+                          }
+                          
+                          // 图片文件
+                          return (
+                            <div 
+                              key={`img-${idx}`} 
+                              style={{ 
+                                float: file.align === 'none' ? 'none' : (file.align || 'left'), 
+                                width: file.width || '50%',
+                                height: file.height === 'auto' ? 'auto' : file.height,
+                                margin: file.align === 'right' ? '0 0 1.5rem 1.5rem' : (file.align === 'left' ? '0 1.5rem 1.5rem 0' : '0 0 1.5rem 0')
+                              }}
+                              className={`border p-1 transition-colors ${isLightMode ? 'border-black/10' : 'border-terminal-gold/20'} ${file.align === 'none' ? 'mx-auto mb-8 clear-both' : ''}`}
+                            >
+                              <img src={file.content} alt={file.name} className="w-full h-full grayscale hover:grayscale-0 transition-all duration-500" style={{ objectFit: file.height === 'auto' ? 'contain' : 'fill' }} />
+                              <div className={`mt-1 text-[8px] font-mono uppercase transition-colors ${isLightMode ? 'text-black/30' : 'text-terminal-gold/40'}`}>
+                                IMG_REF: {file.name}
+                              </div>
+                            </div>
+                          );
+                        };
 
-              {itemMetadata?.files && itemMetadata.files.length > 0 && (
-                <div className={`mt-8 border p-6 transition-colors ${isLightMode ? 'border-black/10 bg-black/5' : 'border-terminal-gold/20 bg-terminal-gold/5'}`}>
-                  <div className={`flex items-center gap-3 mb-4 font-bold tracking-widest text-xs ${isLightMode ? 'text-black' : 'text-terminal-gold'}`}>
-                    <FileText className="w-4 h-4" />
-                    ATTACHED_DOCUMENTS: [ENCRYPTED_ASSETS]
-                  </div>
-                  <div className="space-y-4">
-                    {itemMetadata.files.map((file: any, idx: number) => (
-                      <div key={idx} className="flex items-center justify-between border-b border-terminal-gold/10 pb-4 last:border-0 last:pb-0">
-                        <div className="flex items-center gap-4">
-                          <div className={`w-10 h-10 border flex items-center justify-center ${isLightMode ? 'border-black/20 text-black/40' : 'border-terminal-gold/30 text-terminal-gold/40'}`}>
-                            {file.type.startsWith('image/') ? <Grid className="w-5 h-5" /> : <FileText className="w-5 h-5" />}
-                          </div>
-                          <div>
-                            <p className={`text-xs font-bold ${isLightMode ? 'text-black' : 'text-terminal-gold'}`}>{file.name}</p>
-                            <p className={`text-[9px] opacity-40 uppercase ${isLightMode ? 'text-black' : 'text-terminal-gold'}`}>Type: {file.type.toUpperCase()}</p>
-                          </div>
+                        // Find unreferenced images to float at the top
+                        const unreferencedImages = images.filter((f: any) => {
+                          const isRef = text.includes(`[IMG_${f.name}]`);
+                          if (isRef) referencedNames.add(f.name);
+                          return !isRef;
+                        });
+
+                        return (
+                          <>
+                            {unreferencedImages.map((f: any, i: number) => renderMedia(f, i))}
+                            <div className="whitespace-pre-wrap leading-relaxed inline">
+                              {parts.map((part, i) => {
+                                const match = part.match(/\[IMG_(.*?)\]/);
+                                if (match) {
+                                  const name = match[1];
+                                  const file = images.find((f: any) => f.name === name);
+                                  if (file) return renderMedia(file, i);
+                                }
+                                return <span key={i}>{part}</span>;
+                              })}
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+
+                    {content.section2 && (
+                      <div className="space-y-6">
+                        <h3 className={`font-mono text-lg font-bold flex items-center gap-3 transition-colors ${isLightMode ? 'text-black' : 'text-terminal-gold'}`}>
+                          <span className={`w-1 h-5 transition-colors ${isLightMode ? 'bg-black' : 'bg-terminal-gold'}`}></span>
+                          02. 深度解析：因果纠缠
+                        </h3>
+                        <div className="font-serif text-lg opacity-90 leading-relaxed">
+                          {content.section2}
                         </div>
-                        <button 
-                          onClick={() => downloadFile(file)}
-                          className={`px-4 py-2 border text-[10px] font-bold uppercase tracking-widest transition-all ${isLightMode ? 'border-black/20 text-black hover:bg-black hover:text-white' : 'border-terminal-gold/30 text-terminal-gold hover:bg-terminal-gold hover:text-black'}`}
-                        >
-                          [ <GlitchText text="下载" /> ]
-                        </button>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </section>
+                    )}
 
-            <footer className={`pt-12 border-t flex flex-col md:flex-row justify-between items-center gap-8 transition-colors ${isLightMode ? 'border-black/10' : 'border-terminal-gold/20'}`}>
-              <div className="flex gap-4 w-full md:w-auto">
-                <button 
-                  onClick={handlePrev}
-                  disabled={currentIndex <= 0}
-                  className={`flex-1 md:flex-none terminal-btn flex items-center justify-center gap-2 ${isLightMode ? 'border-black/20 text-black/60 hover:border-black hover:text-black' : ''} ${currentIndex <= 0 ? 'opacity-20 cursor-not-allowed' : ''}`}
-                >
-                  <ChevronLeft className="w-4 h-4" /> <GlitchText text="PREV_LOG" />
-                </button>
-                <button 
-                  onClick={handleNext}
-                  disabled={currentIndex >= allItems.length - 1}
-                  className={`flex-1 md:flex-none terminal-btn flex items-center justify-center gap-2 ${isLightMode ? 'border-black/20 text-black/60 hover:border-black hover:text-black' : ''} ${currentIndex >= allItems.length - 1 ? 'opacity-20 cursor-not-allowed' : ''}`}
-                >
-                  <GlitchText text="NEXT_LOG" /> <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-              <div className={`flex gap-6 transition-colors ${isLightMode ? 'text-black/30' : 'text-terminal-gold/40'}`}>
-                <Share2 onClick={handleShare} className="w-4 h-4 hover:text-black cursor-pointer transition-colors" />
-                <Download onClick={handleDownload} className="w-4 h-4 hover:text-black cursor-pointer transition-colors" />
-                <Printer onClick={handlePrint} className="w-4 h-4 hover:text-black cursor-pointer transition-colors" />
-              </div>
-            </footer>
+                    {content.interview && (
+                      <div className={`p-8 border-l-2 italic transition-colors ${isLightMode ? 'border-black/10 bg-black/5 text-black/70' : 'border-terminal-gold/20 bg-terminal-gold/5 text-slate-400'}`}>
+                        <div className="flex items-start gap-4">
+                          <span className="text-2xl font-bold opacity-20">“</span>
+                          <p className="text-lg">
+                            {content.interview}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className={`relative border p-1 transition-colors ${isLightMode ? 'border-black/10' : 'border-terminal-gold/20'}`}>
+                      <div className="absolute top-4 right-4 z-20 flex gap-2">
+                        <span className={`text-[8px] border px-2 py-0.5 transition-colors ${isLightMode ? 'bg-white/80 text-black border-black/20' : 'bg-black/80 text-terminal-gold border-terminal-gold/30'}`}>HISTOGRAM: SIG_PEAK</span>
+                      </div>
+                      <img 
+                        alt="Space anomaly" 
+                        className={`w-full grayscale contrast-125 transition-all duration-700 ${isLightMode ? 'opacity-80 hover:opacity-100' : 'opacity-40 hover:opacity-70'}`} 
+                        src={content.image}
+                        referrerPolicy="no-referrer"
+                      />
+                      <div className={`absolute inset-0 pointer-events-none transition-colors ${isLightMode ? 'bg-black/5' : 'bg-terminal-gold/5'}`}></div>
+                      <div className={`mt-2 flex justify-between font-mono text-[9px] uppercase transition-colors ${isLightMode ? 'text-black/30' : 'text-terminal-gold/40'}`}>
+                        <span>Capture_ID: ANOMALY_S_POLE_2144</span>
+                        <span>Source: SAT_ORBIT_9</span>
+                      </div>
+                    </div>
+
+                    <div className={`mt-12 border-t pt-8 transition-colors ${isLightMode ? 'border-black/10' : 'border-terminal-gold/20'}`}>
+                      {/* Removed Security Breach Box as per request */}
+                    </div>
+
+                    {itemMetadata?.files && itemMetadata.files.length > 0 && (
+                      <div className={`mt-8 border p-6 transition-colors ${isLightMode ? 'border-black/10 bg-black/5' : 'border-terminal-gold/20 bg-terminal-gold/5'}`}>
+                        <div className={`flex items-center gap-3 mb-4 font-bold tracking-widest text-xs ${isLightMode ? 'text-black' : 'text-terminal-gold'}`}>
+                          <FileText className="w-4 h-4" />
+                          ATTACHED_DOCUMENTS: [ENCRYPTED_ASSETS]
+                        </div>
+                        <div className="space-y-4">
+                          {itemMetadata.files.map((file: any, idx: number) => (
+                            <div key={idx} className="flex items-center justify-between border-b border-terminal-gold/10 pb-4 last:border-0 last:pb-0">
+                              <div className="flex items-center gap-4">
+                                <div className={`w-10 h-10 border flex items-center justify-center ${isLightMode ? 'border-black/20 text-black/40' : 'border-terminal-gold/30 text-terminal-gold/40'}`}>
+                                  {file.type.startsWith('image/') ? <Grid className="w-5 h-5" /> : <FileText className="w-5 h-5" />}
+                                </div>
+                                <div>
+                                  <p className={`text-xs font-bold ${isLightMode ? 'text-black' : 'text-terminal-gold'}`}>{file.name}</p>
+                                  <p className={`text-[9px] opacity-40 uppercase ${isLightMode ? 'text-black' : 'text-terminal-gold'}`}>Type: {file.type.toUpperCase()}</p>
+                                </div>
+                              </div>
+                              <button 
+                                onClick={() => downloadFile(file)}
+                                className={`px-4 py-2 border text-[10px] font-bold uppercase tracking-widest transition-all ${isLightMode ? 'border-black/20 text-black hover:bg-black hover:text-white' : 'border-terminal-gold/30 text-terminal-gold hover:bg-terminal-gold hover:text-black'}`}
+                              >
+                                [ <GlitchText text="下载" /> ]
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </section>
+              )}
+            </div>
+
+            <div>
+              <footer className={`pt-12 border-t flex flex-col md:flex-row justify-between items-center gap-8 transition-colors ${isLightMode ? 'border-black/10' : 'border-terminal-gold/20'}`}>
+                <div className="flex gap-4 w-full md:w-auto">
+                  <button 
+                    onClick={handlePrev}
+                    disabled={currentIndex <= 0}
+                    className={`flex-1 md:flex-none terminal-btn flex items-center justify-center gap-2 ${isLightMode ? 'border-black/20 text-black/60 hover:border-black hover:text-black' : ''} ${currentIndex <= 0 ? 'opacity-20 cursor-not-allowed' : ''} focus:outline-none focus:ring-2 focus:ring-terminal-gold`}
+                    aria-label="上一个档案"
+                    aria-disabled={currentIndex <= 0}
+                  >
+                    <ChevronLeft className="w-4 h-4" aria-hidden="true" /> <GlitchText text="PREV_LOG" />
+                  </button>
+                  <button 
+                    onClick={handleNext}
+                    disabled={currentIndex >= allItems.length - 1}
+                    className={`flex-1 md:flex-none terminal-btn flex items-center justify-center gap-2 ${isLightMode ? 'border-black/20 text-black/60 hover:border-black hover:text-black' : ''} ${currentIndex >= allItems.length - 1 ? 'opacity-20 cursor-not-allowed' : ''} focus:outline-none focus:ring-2 focus:ring-terminal-gold`}
+                    aria-label="下一个档案"
+                    aria-disabled={currentIndex >= allItems.length - 1}
+                  >
+                    <GlitchText text="NEXT_LOG" /> <ChevronRight className="w-4 h-4" aria-hidden="true" />
+                  </button>
+                </div>
+                <div className={`flex gap-6 transition-colors ${isLightMode ? 'text-black/30' : 'text-terminal-gold/40'}`}>
+                  <button onClick={handleShare} className="w-4 h-4 hover:text-black cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-terminal-gold" aria-label="分享档案">
+                    <Share2 className="w-4 h-4" aria-hidden="true" />
+                  </button>
+                  <button onClick={handleDownload} className="w-4 h-4 hover:text-black cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-terminal-gold" aria-label="下载档案">
+                    <Download className="w-4 h-4" aria-hidden="true" />
+                  </button>
+                  <button onClick={handlePrint} className="w-4 h-4 hover:text-black cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-terminal-gold" aria-label="打印档案">
+                    <Printer className="w-4 h-4" aria-hidden="true" />
+                  </button>
+                </div>
+              </footer>
+            </div>
           </article>
         </main>
         <div className={`mt-8 text-[10px] font-mono tracking-widest text-center w-full max-w-4xl border-t pt-4 transition-colors ${isLightMode ? 'border-black/5 text-black/20' : 'border-terminal-gold/10 text-terminal-gold/30'}`}>
@@ -2424,7 +2731,7 @@ const SubmissionPage = ({ onNavigate, onSubmit, archives }: { onNavigate: (view:
   };
 
   return (
-    <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden p-4 md:p-10 border-[4px] md:border-[16px] border-black bg-terminal-bg text-white font-sans selection:bg-terminal-gold selection:text-black">
+    <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden p-3 sm:p-4 md:p-10 border-[4px] md:border-[16px] border-black bg-terminal-bg text-white font-sans selection:bg-terminal-gold selection:text-black">
       <div className="crt-overlay"></div>
       <div className="scanline"></div>
       
@@ -3323,7 +3630,7 @@ const AdminDashboard = ({
       </header>
 
       <div className="flex flex-1 overflow-hidden relative z-10">
-        <nav className="w-64 border-r border-terminal-gold/20 p-6 space-y-4">
+        <nav className="w-56 sm:w-64 border-r border-terminal-gold/20 p-4 sm:p-6 space-y-3 sm:space-y-4">
           <button 
             onClick={() => setActiveTab('categories')}
             className={`w-full text-left p-3 text-xs tracking-widest uppercase transition-all flex items-center gap-3 ${activeTab === 'categories' ? 'bg-terminal-gold text-black' : 'hover:bg-terminal-gold/10'}`}
@@ -3918,6 +4225,7 @@ export default function App() {
   const [selectedArchiveId, setSelectedArchiveId] = useState<string | null>(null);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [isPurging, setIsPurging] = useState(false);
+  const [isLightMode, setIsLightMode] = useState(false);
   
   // 音效管理
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -4588,10 +4896,49 @@ export default function App() {
     setIsPurging(true);
   };
 
+  // 清除失败后的特殊状态
+  const [showGlitchEffect, setShowGlitchEffect] = useState(false);
+  const [showMidnightArchive, setShowMidnightArchive] = useState(false);
+
+  // 隐藏名字收集系统
+  const [collectedNames, setCollectedNames] = useState<string[]>([]);
+  const [showHiddenNames, setShowHiddenNames] = useState<string[]>([]);
+  const [showIsaiahFinn, setShowIsaiahFinn] = useState(false);
+  const hiddenNames = ['艾森哈特', '克罗斯', '克莱斯特', '塞拉斯', '代号X', '索科洛夫', '芬恩'];
+
+  // 随机显示隐藏名字 - 一次显示2-3个
+  const triggerHiddenName = () => {
+    const uncollected = hiddenNames.filter(name => !collectedNames.includes(name));
+    if (uncollected.length > 0) {
+      // 随机选择2-3个名字
+      const count = Math.min(Math.floor(Math.random() * 2) + 2, uncollected.length);
+      const shuffled = [...uncollected].sort(() => Math.random() - 0.5);
+      const selected = shuffled.slice(0, count);
+
+      setShowHiddenNames(selected);
+      setCollectedNames(prev => [...new Set([...prev, ...selected])]);
+
+      // 2秒后消失
+      setTimeout(() => setShowHiddenNames([]), 2000);
+    }
+  };
+
+
+
   const handlePurgeComplete = () => {
     playSound('success');
     setIsPurging(false);
-    setView('login');
+    
+    // 显示闪烁效果
+    setShowGlitchEffect(true);
+    
+    // 5秒后恢复正常
+    setTimeout(() => {
+      setShowGlitchEffect(false);
+    }, 5000);
+    
+    // 跳转到档案库
+    setView('archive');
   };
 
   const handleLogout = () => {
@@ -4617,14 +4964,22 @@ export default function App() {
 
       <AnimatePresence mode="wait">
         {view === 'boot' ? (
-          <BootSequence onComplete={handleBootComplete} />
-        ) : view === 'login' ? (
-          <motion.div 
-            key="login"
+          <motion.div
+            key="boot"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0, filter: 'blur(20px)' }}
-            transition={{ duration: 0.8 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <BootSequence onComplete={handleBootComplete} />
+          </motion.div>
+        ) : view === 'login' ? (
+          <motion.div
+            key="login"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.5 }}
             className="relative flex h-screen w-full flex-col overflow-hidden p-6 md:p-10 border-[16px] border-black"
           >
             <div className="crt-overlay"></div>
@@ -4651,65 +5006,65 @@ export default function App() {
         ) : view === 'search' ? (
           <motion.div
             key="search"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            initial={{ opacity: 0, scale: 0.95, rotateY: -10 }}
+            animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+            exit={{ opacity: 0, scale: 1.05, rotateY: 10 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
             className="w-full"
           >
-            <SearchPage onLogout={handleLogout} onNavigate={handleNavigate} archives={archives} onSelectArchive={setSelectedArchiveId} onSelectItem={setSelectedItemId} bgMusicEnabled={bgMusicEnabled} onToggleBgMusic={toggleBgMusic} />
+            <SearchPage onLogout={handleLogout} onNavigate={handleNavigate} archives={archives} onSelectArchive={setSelectedArchiveId} onSelectItem={setSelectedItemId} bgMusicEnabled={bgMusicEnabled} onToggleBgMusic={toggleBgMusic} isLightMode={isLightMode} onToggleTheme={() => setIsLightMode(!isLightMode)} />
           </motion.div>
         ) : view === 'archive' ? (
           <motion.div
             key="archive"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.05 }}
-            transition={{ duration: 0.5 }}
+            initial={{ opacity: 0, x: 50, scale: 0.9 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: -50, scale: 0.9 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
             className="w-full h-full"
           >
-            <ArchivePage onNavigate={handleNavigate} onSelectArchive={setSelectedArchiveId} archives={archives} />
+            <ArchivePage onNavigate={handleNavigate} onSelectArchive={setSelectedArchiveId} archives={archives} showGlitchEffect={showGlitchEffect} isLightMode={isLightMode} onToggleTheme={() => setIsLightMode(!isLightMode)} />
           </motion.div>
         ) : view === 'history' ? (
           <motion.div
             key="history"
-            initial={{ opacity: 0, filter: 'blur(10px)' }}
-            animate={{ opacity: 1, filter: 'blur(0px)' }}
-            exit={{ opacity: 0, filter: 'blur(10px)' }}
-            transition={{ duration: 0.5 }}
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 50, scale: 0.9 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
             className="w-full h-full"
           >
-            <HistoryPage onNavigate={handleNavigate} historyData={historyData} />
+            <HistoryPage onNavigate={handleNavigate} historyData={historyData} isLightMode={isLightMode} onToggleTheme={() => setIsLightMode(!isLightMode)} />
           </motion.div>
         ) : view === 'terminal' ? (
           <motion.div
             key="terminal"
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -50 }}
-            transition={{ duration: 0.4 }}
+            initial={{ opacity: 0, x: -50, scale: 0.9 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 50, scale: 0.9 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
             className="w-full h-full"
           >
-            <TerminalPage archiveId={selectedArchiveId} onNavigate={handleNavigate} onSelectItem={setSelectedItemId} archives={archives} playSound={playSound} />
+            <TerminalPage archiveId={selectedArchiveId} onNavigate={handleNavigate} onSelectItem={setSelectedItemId} archives={archives} playSound={playSound} showHiddenNames={showHiddenNames} onCharacterArchiveOpen={triggerHiddenName} onUpdateArchives={setArchives} isLightMode={isLightMode} onToggleTheme={() => setIsLightMode(!isLightMode)} />
           </motion.div>
         ) : view === 'details' ? (
           <motion.div
             key="details"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
             className="w-full h-full"
           >
-            <DetailsPage itemId={selectedItemId} onNavigate={handleNavigate} archives={archives} onSelectItem={setSelectedItemId} />
+            <DetailsPage itemId={selectedItemId} onNavigate={handleNavigate} archives={archives} onSelectItem={setSelectedItemId} collectedNames={collectedNames} isLightMode={isLightMode} onToggleTheme={() => setIsLightMode(!isLightMode)} />
           </motion.div>
         ) : view === 'submission' ? (
           <motion.div
             key="submission"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.5 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.4 }}
             className="w-full h-full"
           >
             <SubmissionPage 
@@ -4724,10 +5079,10 @@ export default function App() {
         ) : view === 'system' ? (
           <motion.div
             key="system"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.05 }}
-            transition={{ duration: 0.5 }}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.4 }}
             className="w-full h-full"
           >
             <SystemPage onNavigate={handleNavigate} playSound={playSound} />
@@ -4735,9 +5090,9 @@ export default function App() {
         ) : view === 'system-terminal' ? (
           <motion.div
             key="system-terminal"
-            initial={{ opacity: 0, x: 50 }}
+            initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -50 }}
+            exit={{ opacity: 0, x: 20 }}
             transition={{ duration: 0.4 }}
             className="w-full h-full"
           >
@@ -4748,37 +5103,51 @@ export default function App() {
 
       <AnimatePresence>
         {isAdminLoginVisible && (
-          <AdminLogin 
-            onLogin={() => {
-              playSound('login');
-              setIsAdminLoginVisible(false);
-              // 使用 setTimeout 确保 AdminLogin 完全退出后再显示 AdminDashboard
-              setTimeout(() => {
-                setIsAdminDashboardVisible(true);
-              }, 300);
-            }} 
-            onCancel={() => {
-              playSound('button');
-              setIsAdminLoginVisible(false);
-            }} 
-          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.3 }}
+          >
+            <AdminLogin 
+              onLogin={() => {
+                playSound('login');
+                setIsAdminLoginVisible(false);
+                // 使用 setTimeout 确保 AdminLogin 完全退出后再显示 AdminDashboard
+                setTimeout(() => {
+                  setIsAdminDashboardVisible(true);
+                }, 300);
+              }} 
+              onCancel={() => {
+                playSound('button');
+                setIsAdminLoginVisible(false);
+              }} 
+            />
+          </motion.div>
         )}
       </AnimatePresence>
 
       <AnimatePresence>
         {isAdminDashboardVisible && (
-          <AdminDashboard 
-            archives={archives} 
-            submissions={submissions}
-            historyData={historyData}
-            onUpdateArchives={setArchives}
-            onUpdateSubmissions={setSubmissions}
-            onUpdateHistory={setHistoryData}
-            onClose={() => {
-              playSound('button');
-              setIsAdminDashboardVisible(false);
-            }}
-          />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.4 }}
+          >
+            <AdminDashboard 
+              archives={archives} 
+              submissions={submissions}
+              historyData={historyData}
+              onUpdateArchives={setArchives}
+              onUpdateSubmissions={setSubmissions}
+              onUpdateHistory={setHistoryData}
+              onClose={() => {
+                playSound('button');
+                setIsAdminDashboardVisible(false);
+              }}
+            />
+          </motion.div>
         )}
       </AnimatePresence>
     </>

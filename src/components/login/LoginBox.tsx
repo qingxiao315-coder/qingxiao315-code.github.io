@@ -9,6 +9,42 @@ interface LoginBoxProps {
 
 export const LoginBox: React.FC<LoginBoxProps> = ({ onLogin, onPurge }) => {
   const [passcode, setPasscode] = useState('');
+  const [showPurgeHint, setShowPurgeHint] = useState(false);
+
+  // 播放悬停音效
+  const playHoverSound = () => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = 800;
+      oscillator.type = 'sine';
+      gainNode.gain.value = 0.1;
+      
+      oscillator.start();
+      gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 0.1);
+      oscillator.stop(audioContext.currentTime + 0.1);
+    } catch (e) {
+      console.error('悬停音效播放失败:', e);
+    }
+  };
+
+  // 显示弹窗提示
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowPurgeHint(true);
+    }, 2000); // 2秒后显示提示
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handlePurgeHintClose = () => {
+    setShowPurgeHint(false);
+  };
 
   return (
     <section className="flex-1 flex flex-col items-center justify-center relative px-4 md:px-10">
@@ -68,13 +104,46 @@ export const LoginBox: React.FC<LoginBoxProps> = ({ onLogin, onPurge }) => {
             </button>
             <button 
               onClick={onPurge}
-              className="px-8 py-2 border border-terminal-red/40 text-terminal-red text-xs tracking-widest hover:bg-terminal-red/10 transition-colors uppercase"
+              onMouseEnter={playHoverSound}
+              className="px-8 py-2 border border-terminal-red/40 text-terminal-red text-xs tracking-widest hover:bg-terminal-red/10 transition-colors uppercase animate-pulse"
             >
               紧急清除
             </button>
           </div>
         </div>
       </motion.div>
+
+      {/* Purge Hint Modal */}
+      {showPurgeHint && (
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          className="fixed inset-0 flex items-center justify-center z-50 bg-black/60 backdrop-blur-sm"
+          onClick={handlePurgeHintClose}
+        >
+          <motion.div 
+            initial={{ y: 20 }}
+            animate={{ y: 0 }}
+            className="relative p-6 bg-terminal-bg border-2 border-terminal-red glitch-border max-w-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              onClick={handlePurgeHintClose}
+              className="absolute top-2 right-2 text-terminal-red/60 hover:text-terminal-red text-xl"
+            >
+              ×
+            </button>
+            <h3 className="text-terminal-red font-bold text-lg mb-3 tracking-wider">
+              <GlitchText text="警告：清除操作" />
+            </h3>
+            <p className="text-xs text-terminal-gold/80 leading-relaxed font-mono">
+              紧急清除将永久删除所有系统数据。<br/>
+              此操作不可逆。请确认是否继续？
+            </p>
+          </motion.div>
+        </motion.div>
+      )}
 
       <div className="mt-8 text-[8px] md:text-[10px] opacity-40 uppercase tracking-[0.2em] font-mono text-center">
         正在追踪 IP: 192.XXX.XX.84 // 位置：[机密]
