@@ -22,7 +22,7 @@ export default defineConfig(({mode}) => {
     },
     build: {
       outDir: 'docs',
-      base: '/qingxiao315-code.github.io/'
+      base: './'
     }
   };
 });
